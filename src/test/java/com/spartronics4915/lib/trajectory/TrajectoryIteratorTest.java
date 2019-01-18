@@ -1,6 +1,6 @@
 package com.spartronics4915.lib.trajectory;
 
-import com.spartronics4915.lib.geometry.Translation2d;
+import com.spartronics4915.lib.geometry.Translation2;
 import com.spartronics4915.lib.util.Util;
 import org.junit.jupiter.api.Test;
 
@@ -14,17 +14,17 @@ public class TrajectoryIteratorTest
 
     public static final double kTestEpsilon = Util.kEpsilon;
 
-    public static final List<Translation2d> kWaypoints = Arrays.asList(
-            new Translation2d(0.0, 0.0),
-            new Translation2d(24.0, 0.0),
-            new Translation2d(36.0, 12.0),
-            new Translation2d(60.0, 12.0));
+    public static final List<Translation2> kWaypoints = Arrays.asList(
+            new Translation2(0.0, 0.0),
+            new Translation2(24.0, 0.0),
+            new Translation2(36.0, 12.0),
+            new Translation2(60.0, 12.0));
 
     @Test
     public void test()
     {
-        Trajectory<Translation2d> traj = new Trajectory<>(kWaypoints);
-        TrajectoryIterator<Translation2d> iterator = new TrajectoryIterator<>(traj.getIndexView());
+        Trajectory<Translation2> traj = new Trajectory<>(kWaypoints);
+        TrajectoryIterator<Translation2> iterator = new TrajectoryIterator<>(traj.getIndexView());
 
         // Initial conditions.
         assertEquals(0.0, iterator.getProgress(), kTestEpsilon);

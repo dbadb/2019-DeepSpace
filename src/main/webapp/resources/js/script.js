@@ -24,7 +24,7 @@ const splineWidth = 2;
 const kEps = 1E-9;
 const pi = Math.PI;
 
-class Translation2d {
+class Translation2 {
     constructor(x, y) {
         this.x = x;
         this.y = y;
@@ -39,36 +39,36 @@ class Translation2d {
     }
 
     translateBy(other) {
-        return new Translation2d(this.x + other.x, this.y + other.y);
+        return new Translation2(this.x + other.x, this.y + other.y);
     }
 
     rotateBy(rotation) {
-        return new Translation2d(this.x * rotation.cos - this.y * rotation.sin, this.x * rotation.sin + this.y * rotation.cos);
+        return new Translation2(this.x * rotation.cos - this.y * rotation.sin, this.x * rotation.sin + this.y * rotation.cos);
     }
 
     direction() {
-        return new Rotation2d(this.x, this.y, true);
+        return new Rotation2(this.x, this.y, true);
     }
 
     inverse() {
-        return new Translation2d(-this.x, -this.y);
+        return new Translation2(-this.x, -this.y);
     }
 
     interpolate(other, x) {
         if (x <= 0) {
-            return new Translation2d(this.x, this.y);
+            return new Translation2(this.x, this.y);
         } else if (x >= 1) {
-            return new Translation2d(other.x, other.y);
+            return new Translation2(other.x, other.y);
         }
         return this.extrapolate(other, x);
     }
 
     extrapolate(other, x) {
-        return new Translation2d(x * (other.x - this.x) + this.x, x * (other.y - this.y) + this.y);
+        return new Translation2(x * (other.x - this.x) + this.x, x * (other.y - this.y) + this.y);
     }
 
     scale(s) {
-        return new Translation2d(this.x * s, this.y * s);
+        return new Translation2(this.x * s, this.y * s);
     }
 
     static dot(a, b) {
@@ -78,10 +78,10 @@ class Translation2d {
     static getAngle(a, b) {
         let cos_angle = this.dot(a, b) / (a.norm() * b.norm());
         if (Double.isNaN(cos_angle)) {
-            return new Rotation2d(1, 0, false);
+            return new Rotation2(1, 0, false);
         }
 
-        return Rotation2d.fromRadians(Math.acos(Math.min(1.0, Math.max(cos_angle, -1.0))));
+        return Rotation2.fromRadians(Math.acos(Math.min(1.0, Math.max(cos_angle, -1.0))));
     }
 
     static cross(a, b) {
@@ -112,7 +112,7 @@ class Translation2d {
     }
 }
 
-class Rotation2d {
+class Rotation2 {
     constructor(x, y, normalize) {
         this.cos = x;
         this.sin = y;
@@ -123,7 +123,7 @@ class Rotation2d {
     }
 
     static fromRadians(angle_radians) {
-        return new Rotation2d(Math.cos(angle_radians), Math.sin(angle_radians), false);
+        return new Rotation2(Math.cos(angle_radians), Math.sin(angle_radians), false);
     }
 
     static fromDegrees(angle_degrees) {
@@ -161,26 +161,26 @@ class Rotation2d {
     }
 
     rotateBy(other) {
-        return new Rotation2d(this.cos * other.cos - this.sin * other.sin,
+        return new Rotation2(this.cos * other.cos - this.sin * other.sin,
             this.cos * other.sin + this.sin * other.cos, true);
     }
 
     normal() {
-        return new Rotation2d(-this.sin, this.cos, false);
+        return new Rotation2(-this.sin, this.cos, false);
     }
 
     inverse() {
-        return new Rotation2d(this.cos, -this.sin, false);
+        return new Rotation2(this.cos, -this.sin, false);
     }
 
     interpolate(other, x) {
         if (x <= 0) {
-            return new Rotation2d(this.cos, this.sin, this.normalize);
+            return new Rotation2(this.cos, this.sin, this.normalize);
         } else if (x >= 1) {
-            return new Rotation2d(other.cos, other.sin, other.normalize);
+            return new Rotation2(other.cos, other.sin, other.normalize);
         }
         let angle_diff = this.inverse().rotateBy(other).getRadians();
-        return this.rotateBy(Rotation2d.fromRadians(angle_diff * x));
+        return this.rotateBy(Rotation2.fromRadians(angle_diff * x));
     }
 
     distance(other) {
@@ -188,7 +188,7 @@ class Rotation2d {
     }
 }
 
-class Pose2d {
+class Pose2 {
     constructor(translation, rotation, comment) {
         this.translation = translation;
         this.rotation = rotation;
@@ -208,8 +208,8 @@ class Pose2d {
             c = (1.0 - cos_theta) / delta.dtheta;
         }
 
-        return new Pose2d(new Translation2d(delta.dx * s - delta.dy * c, delta.dx * c + delta.dy * s),
-            new Rotation2d(cos_theta, sin_theta, false));
+        return new Pose2(new Translation2(delta.dx * s - delta.dy * c, delta.dx * c + delta.dy * s),
+            new Rotation2(cos_theta, sin_theta, false));
     }
 
     static log(transform) {
@@ -223,8 +223,8 @@ class Pose2d {
             halftheta_by_tan_of_halfdtheta = -(half_dtheta * transform.getRotation().sin()) / cos_minus_one;
         }
         let translation_part = transform.getTranslation()
-            .rotateBy(new Rotation2d(halftheta_by_tan_of_halfdtheta, -half_dtheta, false));
-        return new Twist2d(translation_part.x(), translation_part.y(), dtheta);
+            .rotateBy(new Rotation2(halftheta_by_tan_of_halfdtheta, -half_dtheta, false));
+        return new Twist2(translation_part.x(), translation_part.y(), dtheta);
     }
 
     get getTranslation() {
@@ -236,31 +236,31 @@ class Pose2d {
     }
 
     transformBy(other) {
-        return new Pose2d(this.translation.translateBy(other.translation.rotateBy(this.rotation)),
+        return new Pose2(this.translation.translateBy(other.translation.rotateBy(this.rotation)),
             this.rotation.rotateBy(other.rotation));
     }
 
     inverse() {
         let rotation_inverted = this.rotation.inverse();
-        return new Pose2d(this.translation.inverse().rotateBy(rotation_inverted), rotation_inverted);
+        return new Pose2(this.translation.inverse().rotateBy(rotation_inverted), rotation_inverted);
     }
 
     normal() {
-        return new Pose2d(this.translation, this.rotation.normal());
+        return new Pose2(this.translation, this.rotation.normal());
     }
 
     interpolate(other, x) {
         if (x <= 0) {
-            return new Pose2d(this.translation, this.rotation, this.comment);
+            return new Pose2(this.translation, this.rotation, this.comment);
         } else if (x >= 1) {
-            return new Pose2d(other.translation, other.rotation, other.comment);
+            return new Pose2(other.translation, other.rotation, other.comment);
         }
-        let twist = Pose2d.log(this.inverse().transformBy(other));
-        return this.transformBy(Pose2d.exp(twist.scaled(x)));
+        let twist = Pose2.log(this.inverse().transformBy(other));
+        return this.transformBy(Pose2.exp(twist.scaled(x)));
     }
 
     distance(other) {
-        return Pose2d.log(this.inverse().transformBy(other)).norm();
+        return Pose2.log(this.inverse().transformBy(other)).norm();
     }
 
     heading(other) {
@@ -286,7 +286,7 @@ class Pose2d {
     }
 
     toString() {
-        return "new Pose2d(new Translation2d(" + this.translation.x + ", " + this.translation.y + "), new Rotation2d(" + this.rotation.cos + ", " + this.rotation.sin + ", " + this.rotation.normalize + "))";
+        return "new Pose2(new Translation2(" + this.translation.x + ", " + this.translation.y + "), new Rotation2(" + this.rotation.cos + ", " + this.rotation.sin + ", " + this.rotation.normalize + "))";
     }
 
     transform(other) {
@@ -334,7 +334,7 @@ function drawRobot(position, heading) {
     let points = [];
 
     angles.forEach(function (angle) {
-        let point = new Translation2d(position.translation.x + (r * Math.cos(angle)),
+        let point = new Translation2(position.translation.x + (r * Math.cos(angle)),
             position.translation.y + (r * Math.sin(angle)));
         points.push(point);
         point.draw(Math.abs(angle - heading) < pi / 2 ? "#00AAFF" : "#0066FF", splineWidth);
@@ -400,7 +400,7 @@ function rebind() {
 function addPoint() {
     let prev;
     if (waypoints.length > 0) prev = waypoints[waypoints.length - 1].translation;
-    else prev = new Translation2d(50, 50);
+    else prev = new Translation2(50, 50);
     $("tbody").append("<tr>" + "<td class='drag-handler'></td>"
         + "<td class='x'><input type='number' value='" + (prev.x + 50) + "'></td>"
         + "<td class='y'><input type='number' value='" + (prev.y + 50) + "'></td>"
@@ -448,7 +448,7 @@ function update() {
         let comment = ($($($(this).children()).children()[3]).val());
         let enabled = ($($($(this).children()).children()[4]).prop('checked'));
         if (enabled) {
-            waypoints.push(new Pose2d(new Translation2d(x, y), Rotation2d.fromDegrees(heading), comment));
+            waypoints.push(new Pose2(new Translation2(x, y), Rotation2.fromDegrees(heading), comment));
             data += x + "," + y + "," + heading + ";";
         }
     });
@@ -470,7 +470,7 @@ function update() {
             splinePoints = [];
             for (let i in points) {
                 let point = points[i];
-                splinePoints.push(new Pose2d(new Translation2d(point.x, point.y), Rotation2d.fromRadians(point.rotation)));
+                splinePoints.push(new Pose2(new Translation2(point.x, point.y), Rotation2.fromRadians(point.rotation)));
             }
 
             draw(2);

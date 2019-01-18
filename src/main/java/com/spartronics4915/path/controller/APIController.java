@@ -1,9 +1,9 @@
 package com.spartronics4915.path.controller;
 
-import com.spartronics4915.lib.geometry.Pose2d;
-import com.spartronics4915.lib.geometry.Pose2dWithCurvature;
-import com.spartronics4915.lib.geometry.Rotation2d;
-import com.spartronics4915.lib.geometry.Translation2d;
+import com.spartronics4915.lib.geometry.Pose2;
+import com.spartronics4915.lib.geometry.Pose2WithCurvature;
+import com.spartronics4915.lib.geometry.Rotation2;
+import com.spartronics4915.lib.geometry.Translation2;
 import com.spartronics4915.lib.spline.QuinticHermiteSpline;
 import com.spartronics4915.lib.spline.Spline;
 import com.spartronics4915.lib.spline.SplineGenerator;
@@ -26,7 +26,7 @@ public class APIController {
             e.printStackTrace();
         }
 
-        ArrayList<Pose2d> points = new ArrayList<>();
+        ArrayList<Pose2> points = new ArrayList<>();
         for (String pointString : message.split(";")) {
             String[] pointData = pointString.split(",");
 
@@ -34,12 +34,12 @@ public class APIController {
             int y = pointData[1].equals("NaN") ? 0 : Integer.parseInt(pointData[1]);
             int heading = pointData[2].equals("NaN") ? 0 : Integer.parseInt(pointData[2]);
 
-            points.add(new Pose2d(new Translation2d(x, y), Rotation2d.fromDegrees(heading)));
+            points.add(new Pose2(new Translation2(x, y), Rotation2.fromDegrees(heading)));
         }
 
         ArrayList<QuinticHermiteSpline> mQuinticHermiteSplines = new ArrayList<>();
         ArrayList<Spline> mSplines = new ArrayList<>();
-        ArrayList<Pose2dWithCurvature> positions = new ArrayList<>();
+        ArrayList<Pose2WithCurvature> positions = new ArrayList<>();
         if (points.size() < 2) {
             return "no";
         } else {
@@ -57,14 +57,14 @@ public class APIController {
         }
 
         String json = "{\"points\":[";
-        for (Pose2dWithCurvature pose : positions) {
+        for (Pose2WithCurvature pose : positions) {
             json += poseToJSON(pose) + ",";
         }
 
         return json.substring(0, json.length() - 1) + "]}";
     }
 
-    private String poseToJSON(Pose2dWithCurvature pose) {
+    private String poseToJSON(Pose2WithCurvature pose) {
         double x = pose.getTranslation().x();
         double y = pose.getTranslation().y();
         double rotation = pose.getRotation().getRadians();

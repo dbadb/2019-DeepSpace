@@ -11,9 +11,9 @@ import com.spartronics4915.lib.util.RobotStateMap;
 import com.spartronics4915.lib.util.ILooper;
 import com.spartronics4915.lib.util.ILoop;
 import com.spartronics4915.lib.drivers.TalonSRXFactory;
-import com.spartronics4915.lib.geometry.Pose2d;
-import com.spartronics4915.lib.geometry.Rotation2d;
-import com.spartronics4915.lib.geometry.Translation2d;
+import com.spartronics4915.lib.geometry.Pose2;
+import com.spartronics4915.lib.geometry.Rotation2;
+import com.spartronics4915.lib.geometry.Translation2;
 
 import edu.wpi.first.wpilibj.Timer;
 
@@ -102,7 +102,7 @@ public class Turret extends Subsystem
                 switch (mSystemState)
                 {
                     case FOLLOWING:
-                        Pose2d pose;
+                        Pose2 pose;
                         pose = mRobotStateMap.getFieldToVehicle(Timer.getFPGATimestamp());
                         double newAbsoluteAngle = calculateAbsoluteTurretAngle(pose, Constants.kTurretTargetFieldPosition);
                         mMotor.set(ControlMode.Position,
@@ -142,10 +142,10 @@ public class Turret extends Subsystem
      * 
      * @return Absolute angle in degrees, with a range of 0-360
      */
-    private double calculateAbsoluteTurretAngle(Pose2d robotPose, Translation2d targetTranslation)
+    private double calculateAbsoluteTurretAngle(Pose2 robotPose, Translation2 targetTranslation)
     {
         robotPose.getTranslation().translateBy(Constants.kTurretRobotCenterOffset);
-        Rotation2d angle = new Rotation2d(robotPose.getTranslation().x() - targetTranslation.x(),
+        Rotation2 angle = new Rotation2(robotPose.getTranslation().x() - targetTranslation.x(),
                 robotPose.getTranslation().y() - targetTranslation.y(), true)
                         .rotateBy(robotPose.getRotation().inverse());
         return angle.getDegrees() + 180.0;

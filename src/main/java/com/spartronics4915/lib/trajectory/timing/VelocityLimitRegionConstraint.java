@@ -1,16 +1,16 @@
 package com.spartronics4915.lib.trajectory.timing;
 
-import com.spartronics4915.lib.geometry.ITranslation2d;
-import com.spartronics4915.lib.geometry.Translation2d;
+import com.spartronics4915.lib.geometry.ITranslation2;
+import com.spartronics4915.lib.geometry.Translation2;
 
-public class VelocityLimitRegionConstraint<S extends ITranslation2d<S>> implements TimingConstraint<S>
+public class VelocityLimitRegionConstraint<S extends ITranslation2<S>> implements TimingConstraint<S>
 {
 
-    protected final Translation2d min_corner_;
-    protected final Translation2d max_corner_;
+    protected final Translation2 min_corner_;
+    protected final Translation2 max_corner_;
     protected final double velocity_limit_;
 
-    public VelocityLimitRegionConstraint(Translation2d min_corner, Translation2d max_corner, double velocity_limit)
+    public VelocityLimitRegionConstraint(Translation2 min_corner, Translation2 max_corner, double velocity_limit)
     {
         min_corner_ = min_corner;
         max_corner_ = max_corner;
@@ -20,7 +20,7 @@ public class VelocityLimitRegionConstraint<S extends ITranslation2d<S>> implemen
     @Override
     public double getMaxVelocity(S state)
     {
-        final Translation2d translation = state.getTranslation();
+        final Translation2 translation = state.getTranslation();
         if (translation.x() <= max_corner_.x() && translation.x() >= min_corner_.x() &&
                 translation.y() <= max_corner_.y() && translation.y() >= min_corner_.y())
         {

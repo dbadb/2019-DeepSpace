@@ -1,6 +1,6 @@
 package com.spartronics4915.lib.trajectory;
 
-import com.spartronics4915.lib.geometry.Translation2d;
+import com.spartronics4915.lib.geometry.Translation2;
 import com.spartronics4915.lib.util.Util;
 import org.junit.jupiter.api.Test;
 
@@ -14,17 +14,17 @@ public class TrajectoryTest
 
     public static final double kTestEpsilon = Util.kEpsilon;
 
-    public static final List<Translation2d> kWaypoints = Arrays.asList(
-            new Translation2d(0.0, 0.0),
-            new Translation2d(24.0, 0.0),
-            new Translation2d(36.0, 12.0),
-            new Translation2d(60.0, 12.0));
+    public static final List<Translation2> kWaypoints = Arrays.asList(
+            new Translation2(0.0, 0.0),
+            new Translation2(24.0, 0.0),
+            new Translation2(36.0, 12.0),
+            new Translation2(60.0, 12.0));
 
     @Test
     public void testConstruction()
     {
         // Empty constructor.
-        Trajectory<Translation2d> traj = new Trajectory<>();
+        Trajectory<Translation2> traj = new Trajectory<>();
         assertTrue(traj.isEmpty());
         assertEquals(0.0, traj.getIndexView().first_interpolant(), kTestEpsilon);
         assertEquals(0.0, traj.getIndexView().last_interpolant(), kTestEpsilon);
@@ -41,7 +41,7 @@ public class TrajectoryTest
     @Test
     public void testStateAccessors()
     {
-        Trajectory<Translation2d> traj = new Trajectory<>(kWaypoints);
+        Trajectory<Translation2> traj = new Trajectory<>(kWaypoints);
 
         assertEquals(kWaypoints.get(0), traj.getState(0));
         assertEquals(kWaypoints.get(1), traj.getState(1));
@@ -71,7 +71,7 @@ public class TrajectoryTest
         assertEquals(traj.getInterpolated(2.75).index_floor(), 2);
         assertEquals(traj.getInterpolated(2.75).index_ceil(), 3);
 
-        Trajectory<Translation2d>.IndexView index_view = traj.getIndexView();
+        Trajectory<Translation2>.IndexView index_view = traj.getIndexView();
         assertEquals(kWaypoints.get(0).interpolate(kWaypoints.get(1), .25), index_view.sample(0.25).state());
         assertEquals(kWaypoints.get(1).interpolate(kWaypoints.get(2), .5), index_view.sample(1.5).state());
         assertEquals(kWaypoints.get(2).interpolate(kWaypoints.get(3), .75), index_view.sample(2.75).state());

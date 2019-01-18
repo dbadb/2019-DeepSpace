@@ -6,19 +6,18 @@ import com.spartronics4915.lib.util.Util;
 import java.text.DecimalFormat;
 
 /**
- * A movement along an arc at constant curvature and velocity. We can use ideas
- * from "differential calculus" to create
- * new Pose2ds from a Twist2d and visa versa.
+ * A movement along an arc at constant curvature and velocity. We can use
+ * differential calculus to create new Pose2s from a Twist2 and vice versa.
  * <p>
  * A Twist can be used to represent a difference between two poses, a velocity,
  * an acceleration, etc.
  */
-public class Twist2d implements Interpolable<Twist2d>
+public class Twist2 implements Interpolable<Twist2>
 {
 
-    protected static final Twist2d kIdentity = new Twist2d(0.0, 0.0, 0.0);
+    protected static final Twist2 kIdentity = new Twist2(0.0, 0.0, 0.0);
 
-    public static final Twist2d identity()
+    public static final Twist2 identity()
     {
         return kIdentity;
     }
@@ -27,30 +26,30 @@ public class Twist2d implements Interpolable<Twist2d>
     public final double dy;
     public final double dtheta; // Radians!
 
-    public Twist2d()
+    public Twist2()
     {
         this.dx = 0;
         this.dy = 0;
         this.dtheta = 0;
     }
 
-    public Twist2d(double dx, double dy, double dtheta)
+    public Twist2(double dx, double dy, double dtheta)
     {
         this.dx = dx;
         this.dy = dy;
         this.dtheta = dtheta;
     }
 
-    public Twist2d(Twist2d src)
+    public Twist2(Twist2 src)
     {
         this.dx = src.dx;
         this.dy = src.dy;
         this.dtheta = src.dtheta;
     }
 
-    public Twist2d scaled(double scale)
+    public Twist2 scaled(double scale)
     {
-        return new Twist2d(dx * scale, dy * scale, dtheta * scale);
+        return new Twist2(dx * scale, dy * scale, dtheta * scale);
     }
 
     public double norm()
@@ -69,18 +68,18 @@ public class Twist2d implements Interpolable<Twist2d>
     }
 
     /**
-     * for some applications interpolating a Twist2d may be fraught with peril. 
-     * If you are trying to move from a Pose2d according to a Twist2d
-     * consider using Pose2d.interpolate
+     * for some applications interpolating a Twist2 may be fraught with peril. 
+     * If you are trying to move from a Pose2 according to a Twist2
+     * consider using Pose2.interpolate
      */
     @Override
-    public Twist2d interpolate(final Twist2d other, double x)
+    public Twist2 interpolate(final Twist2 other, double x)
     {
         if (x <= 0)
-            return new Twist2d(this);
+            return new Twist2(this);
         else if (x >= 1)
-            return new Twist2d(other);
-        final Twist2d t = new Twist2d(
+            return new Twist2(other);
+        final Twist2 t = new Twist2(
             this.dx + x*(other.dx - this.dx),
             this.dy + x*(other.dy - this.dy),
             this.dtheta + x*(other.dtheta - this.dtheta

@@ -2,7 +2,7 @@ package com.spartronics4915.frc2019.subsystems;
 
 import com.spartronics4915.frc2019.Constants;
 import com.spartronics4915.frc2019.Kinematics;
-import com.spartronics4915.lib.geometry.Pose2d;
+import com.spartronics4915.lib.geometry.Pose2;
 import com.spartronics4915.lib.util.RobotStateMap;
 import com.spartronics4915.lib.util.ILooper;
 
@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.spartronics4915.lib.util.ILoop;
-import com.spartronics4915.lib.geometry.Rotation2d;
-import com.spartronics4915.lib.geometry.Twist2d;
+import com.spartronics4915.lib.geometry.Rotation2;
+import com.spartronics4915.lib.geometry.Twist2;
 import com.spartronics4915.lib.lidar.LidarProcessor;
 
 public class RobotStateEstimator extends Subsystem
@@ -35,7 +35,7 @@ public class RobotStateEstimator extends Subsystem
     private double mLeftPrevDist = 0.0;
     private double mRightPrevDist = 0.0;
 
-    private static final Pose2d kZeroPose = Pose2d.identity();
+    private static final Pose2 kZeroPose = Pose2.identity();
 
     RobotStateEstimator()
     {
@@ -45,9 +45,9 @@ public class RobotStateEstimator extends Subsystem
             This may need to be deferred until autonomousInit or
             something (because of the rules).
         */
-        final Pose2d vehicleToLidar = new Pose2d(
+        final Pose2 vehicleToLidar = new Pose2(
             Constants.kLidarXOffset, Constants.kLidarYOffset,
-            Rotation2d.fromDegrees(Constants.kLidarYawAngleDegrees)
+            Rotation2.fromDegrees(Constants.kLidarYawAngleDegrees)
         );
         mLidarProcessor = new LidarProcessor(LidarProcessor.RunMode.kRunInRobot, 
                             Constants.kSegmentReferenceModel,
@@ -83,17 +83,17 @@ public class RobotStateEstimator extends Subsystem
     public void outputTelemetry()
     {
         final RobotStateMap.State estate = mEncoderRobotState.getLatestState();
-        Pose2d epose = estate.pose;
+        Pose2 epose = estate.pose;
         SmartDashboard.putString("RobotState/pose",
                 epose.getTranslation().x() +
                         " " + epose.getTranslation().y() +
                         " " + epose.getRotation().getDegrees());
-        Twist2d pVel = estate.predictedVelocity;
+        Twist2 pVel = estate.predictedVelocity;
         SmartDashboard.putNumber("RobotState/velocity", pVel.dx);
         SmartDashboard.putNumber("RobotState/field_degrees", epose.getRotation().getDegrees());
 
         final RobotStateMap.State lstate = mLidarRobotState.getLatestState();
-        Pose2d lpose = lstate.pose; 
+        Pose2 lpose = lstate.pose; 
         SmartDashboard.putString("Lidar/pose",
                 lpose.getTranslation().x() +
                         " " + lpose.getTranslation().y() +
@@ -127,7 +127,7 @@ public class RobotStateEstimator extends Subsystem
         public synchronized void onLoop(double timestamp)
         {
             final RobotStateMap.State last = mEncoderRobotState.getLatestState();
-            final Pose2d lastPose = last.pose;
+            final Pose2 lastPose = last.pose;
 
             /* two ways to measure current velocity */
             /* method 1, integrationVelocity
@@ -145,10 +145,10 @@ public class RobotStateEstimator extends Subsystem
             final double rightDist = mDrive.getRightEncoderDistance();
             final double leftDelta = leftDist - mLeftPrevDist;
             final double rightDelta = rightDist - mRightPrevDist;
-            final Rotation2d heading = mDrive.getHeading();
+            final Rotation2 heading = mDrive.getHeading();
             mLeftPrevDist = leftDist;
             mRightPrevDist = rightDist;
-            final Twist2d iVal = Kinematics.forwardKinematics(
+            final Twist2 iVal = Kinematics.forwardKinematics(
                                     lastPose.getRotation(), 
                                     leftDelta, rightDelta, heading);
 
@@ -163,14 +163,14 @@ public class RobotStateEstimator extends Subsystem
             *  is in human-readable form. Also of note, this variant doesn't 
             *  include the gyro heading in its calculation.
             */
-            final Twist2d pVal = Kinematics.forwardKinematics(
+            final Twist2 pVal = Kinematics.forwardKinematics(
                                         mDrive.getLeftLinearVelocity(),
                                         mDrive.getRightLinearVelocity());
 
             /* integrateForward: given a last state and a current velocity,
             *  estimate a new state (P2 = P1 + dPdt * dt)
             */
-            final Pose2d nextP = Kinematics.integrateForwardKinematics(last.pose, iVal);
+            final Pose2 nextP = Kinematics.integrateForwardKinematics(last.pose, iVal);
 
             /* record the new state estimate */
             mEncoderRobotState.addObservations(timestamp, nextP, iVal, pVal);

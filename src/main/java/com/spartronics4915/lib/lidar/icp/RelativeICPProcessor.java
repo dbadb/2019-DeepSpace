@@ -1,9 +1,13 @@
 package com.spartronics4915.lib.lidar.icp;
 
+import com.spartronics4915.lib.lidar.LidarScan;
+import com.spartronics4915.lib.geometry.Point2;
+import com.spartronics4915.lib.geometry.Transform2;
+
 public class RelativeICPProcessor
 {
     private final ICP mICP;
-    private final Transform mZero;
+    private final Transform2 mZero;
     private IReferenceModel mLastReferenceModel;
 
     /**
@@ -26,7 +30,7 @@ public class RelativeICPProcessor
     public RelativeICPProcessor(ICP icp)
     {
         mICP = icp;
-        mZero = new Transform();
+        mZero = new Transform2();
     }
 
     /**
@@ -39,14 +43,15 @@ public class RelativeICPProcessor
      * @param pointCloud
      * @return The relative transform to transform first pointcloud to second.
      */
-    public Transform doRelativeICP(Iterable<Point> pointCloud)
+    public Transform2 doRelativeICP(LidarScan scan)
     {
-        Transform result;
+        Transform2 result;
         if(mLastReferenceModel != null)
-            result = mICP.doICP(pointCloud, mZero, mLastReferenceModel);
+            result = mICP.doICP(scan, mZero, mLastReferenceModel);
         else
-            result = new Transform(); // ie no-tranform
-        mLastReferenceModel = new PointCloudReferenceModel(pointCloud); 
+            result = new Transform2(); // ie no-tranform
+        mLastReferenceModel = new PointCloudReferenceModel(
+                                    scan.getCulledPoints(3/*in res*/));
         return result;
     }
 }

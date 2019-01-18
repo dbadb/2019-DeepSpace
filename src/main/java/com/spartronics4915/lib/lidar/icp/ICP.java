@@ -1,14 +1,13 @@
 package com.spartronics4915.lib.lidar.icp;
 
+import com.spartronics4915.lib.lidar.LidarScan;
+import com.spartronics4915.lib.geometry.Transform2;
+import com.spartronics4915.lib.geometry.Point2;
 import com.spartronics4915.lib.LibConstants;
-import java.util.ArrayList;
-import java.util.HashSet;
 
 public class ICP
 {
-
     public static final double OUTLIER_THRESH = 1.0; // multiplier of the mean distance
-
     public long timeoutNs = 0; // used during normal operation, usually nonzero
     public long maxIterations = 0; // used by test, usually 0
 
@@ -30,28 +29,30 @@ public class ICP
      * @param guessTrans An initial guess Transform (if null, the identity is used)
      * @return The computed Transform
      */
-    public Transform doICP(Iterable<Point> points, Transform guessTrans, IReferenceModel reference)
+    public Transform2 doICP(LidarScan scan, Transform2 guessTrans, 
+        IReferenceModel reference)
     {
         long startTime = System.nanoTime();
         long iteration = 0;
         double lastMeanDist = Double.POSITIVE_INFINITY;
         boolean converged = false;
-        guessTrans = guessTrans == null ? new Transform() : guessTrans;
+        Iterable<Point2> points = scan.getCulledPoints(3/*inches resolution*/);
+        guessTrans = guessTrans == null ? new Transform2() : guessTrans;
         while ((maxIterations > 0 && iteration++ < maxIterations) ||
                ((System.nanoTime()-startTime) < timeoutNs) )
         {
-            final Transform transInv = guessTrans.inverse();
+            final Transform2 transInv = guessTrans.inverse();
             final double threshold = lastMeanDist * OUTLIER_THRESH;
             double sumDists = 0;
 
             double SumXa = 0, SumXb = 0, SumYa = 0, SumYb = 0;
             double Sxx = 0, Sxy = 0, Syx = 0, Syy = 0;
             int N = 0;
-            for (Point p : points)
+            for (Point2 p : points)
             {
                 // get pairs of corresponding points
-                Point p2 = transInv.apply(p);
-                Point rp = reference.getClosestPoint(p2);
+                Point2 p2 = transInv.apply(p);
+                Point2 rp = reference.getClosestPoint(p2);
                 double dist = p2.getDistance(rp);
                 if (dist > threshold)
                     continue;
@@ -96,8 +97,8 @@ public class ICP
             final double tx = mean_x_a - mean_x_b * ccos + mean_y_b * csin;
             final double ty = mean_y_a - mean_x_b * csin - mean_y_b * ccos;
 
-            Transform prevTrans = guessTrans;
-            guessTrans = new Transform(theta, tx, ty, csin, ccos);
+            Transform2 prevTrans = guessTrans;
+            guessTrans = new Transform2(theta, tx, ty, csin, ccos);
             if (isConverged(prevTrans, guessTrans))
             {
                 converged = true;
@@ -113,44 +114,10 @@ public class ICP
         return guessTrans;
     }
 
-    private boolean isConverged(Transform prev, Transform cur)
+    private boolean isConverged(Transform2 prev, Transform2 cur)
     {
         return Math.abs(prev.theta - cur.theta) < LibConstants.kLidarICPAngleEpsilon &&
                 Math.abs(prev.tx - cur.tx) < LibConstants.kLidarICPTranslationEpsilon &&
                 Math.abs(prev.ty - cur.ty) < LibConstants.kLidarICPTranslationEpsilon;
     }
-
-    /**
-     * Returns a list of points that have been thinned roughly uniformly.
-     */
-    public Iterable<Point> getCulledPoints(Iterable<Point> points, 
-                                            double bucketSize)
-    {
-        if(bucketSize == 0) 
-            return points;
-
-        ArrayList<Point> list = new ArrayList<>();
-        HashSet<Integer> buckets = new HashSet<>();
-        for (Point p : points)
-        {
-            if (buckets.add(getBucket(p.x, p.y, bucketSize)))
-                list.add(p);
-        }
-        return list;
-    }
-
-    /**
-     * Cantor pairing function (to bucket & hash two doubles)
-     * converts two integers into one; used as a hash key
-     */
-    private int getBucket(double x, double y, double bucketSize)
-    {
-        int ix = (int) (x / bucketSize);
-        int iy = (int) (y / bucketSize);
-        int a = ix >= 0 ? 2 * ix : -2 * ix - 1;
-        int b = iy >= 0 ? 2 * iy : -2 * iy - 1;
-        int sum = a + b;
-        return sum * (sum + 1) / 2 + a;
-    }
-
 }

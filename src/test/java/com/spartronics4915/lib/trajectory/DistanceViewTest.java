@@ -1,6 +1,6 @@
 package com.spartronics4915.lib.trajectory;
 
-import com.spartronics4915.lib.geometry.Translation2d;
+import com.spartronics4915.lib.geometry.Translation2;
 import com.spartronics4915.lib.util.Util;
 import org.junit.jupiter.api.Test;
 
@@ -18,16 +18,16 @@ public class DistanceViewTest
     public void test()
     {
         // Specify desired waypoints.
-        List<Translation2d> waypoints = Arrays.asList(
-                new Translation2d(0.0, 0.0),
-                new Translation2d(24.0, 0.0),
-                new Translation2d(36.0, 0.0),
-                new Translation2d(36.0, 24.0),
-                new Translation2d(60.0, 24.0));
+        List<Translation2> waypoints = Arrays.asList(
+                new Translation2(0.0, 0.0),
+                new Translation2(24.0, 0.0),
+                new Translation2(36.0, 0.0),
+                new Translation2(36.0, 24.0),
+                new Translation2(60.0, 24.0));
 
         // Create the reference trajectory (straight line motion between waypoints).
-        Trajectory<Translation2d> trajectory = new Trajectory<>(waypoints);
-        final DistanceView<Translation2d> distance_view = new DistanceView<>(trajectory);
+        Trajectory<Translation2> trajectory = new Trajectory<>(waypoints);
+        final DistanceView<Translation2> distance_view = new DistanceView<>(trajectory);
 
         assertEquals(0.0, distance_view.first_interpolant(), kTestEpsilon);
         assertEquals(84.0, distance_view.last_interpolant(), kTestEpsilon);

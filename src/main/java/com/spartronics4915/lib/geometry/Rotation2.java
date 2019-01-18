@@ -12,12 +12,12 @@ import static com.spartronics4915.lib.util.Util.kEpsilon;
  * <p>
  * Inspired by Sophus (https://github.com/strasdat/Sophus/tree/master/sophus)
  */
-public class Rotation2d implements IRotation2d<Rotation2d>
+public class Rotation2 implements IRotation2<Rotation2>
 {
 
-    protected static final Rotation2d kIdentity = new Rotation2d();
+    protected static final Rotation2 kIdentity = new Rotation2();
 
-    public static final Rotation2d identity()
+    public static final Rotation2 identity()
     {
         return kIdentity;
     }
@@ -25,12 +25,12 @@ public class Rotation2d implements IRotation2d<Rotation2d>
     protected final double cos_angle_;
     protected final double sin_angle_;
 
-    public Rotation2d()
+    public Rotation2()
     {
         this(1, 0, false);
     }
 
-    public Rotation2d(double x, double y, boolean normalize)
+    public Rotation2(double x, double y, boolean normalize)
     {
         if (normalize)
         {
@@ -55,23 +55,23 @@ public class Rotation2d implements IRotation2d<Rotation2d>
         }
     }
 
-    public Rotation2d(final Rotation2d other)
+    public Rotation2(final Rotation2 other)
     {
         cos_angle_ = other.cos_angle_;
         sin_angle_ = other.sin_angle_;
     }
 
-    public Rotation2d(final Translation2d direction, boolean normalize)
+    public Rotation2(final Translation2 direction, boolean normalize)
     {
         this(direction.x(), direction.y(), normalize);
     }
 
-    public static Rotation2d fromRadians(double angle_radians)
+    public static Rotation2 fromRadians(double angle_radians)
     {
-        return new Rotation2d(Math.cos(angle_radians), Math.sin(angle_radians), false);
+        return new Rotation2(Math.cos(angle_radians), Math.sin(angle_radians), false);
     }
 
-    public static Rotation2d fromDegrees(double angle_degrees)
+    public static Rotation2 fromDegrees(double angle_degrees)
     {
         return fromRadians(Math.toRadians(angle_degrees));
     }
@@ -113,57 +113,57 @@ public class Rotation2d implements IRotation2d<Rotation2d>
     }
 
     /**
-     * We can rotate this Rotation2d by adding together the effects of it and
+     * We can rotate this Rotation2 by adding together the effects of it and
      * another rotation.
      *
      * @param other The other rotation. See:
      *              https://en.wikipedia.org/wiki/Rotation_matrix
      * @return This rotation rotated by other.
      */
-    public Rotation2d rotateBy(final Rotation2d other)
+    public Rotation2 rotateBy(final Rotation2 other)
     {
-        return new Rotation2d(cos_angle_ * other.cos_angle_ - sin_angle_ * other.sin_angle_,
+        return new Rotation2(cos_angle_ * other.cos_angle_ - sin_angle_ * other.sin_angle_,
                 cos_angle_ * other.sin_angle_ + sin_angle_ * other.cos_angle_, true);
     }
 
-    public Rotation2d normal()
+    public Rotation2 normal() /* ie: perpendicular */
     {
-        return new Rotation2d(-sin_angle_, cos_angle_, false);
+        return new Rotation2(-sin_angle_, cos_angle_, false);
     }
 
     /**
-     * The inverse of a Rotation2d "undoes" the effect of this rotation.
+     * The inverse of a Rotation2 "undoes" the effect of this rotation.
      *
      * @return The opposite of this rotation.
      */
-    public Rotation2d inverse()
+    public Rotation2 inverse()
     {
-        return new Rotation2d(cos_angle_, -sin_angle_, false);
+        return new Rotation2(cos_angle_, -sin_angle_, false);
     }
 
-    public boolean isParallel(final Rotation2d other)
+    public boolean isParallel(final Rotation2 other)
     {
-        return Util.epsilonEquals(Translation2d.cross(toTranslation(), other.toTranslation()), 0.0);
+        return Util.epsilonEquals(Translation2.cross(toTranslation(), other.toTranslation()), 0.0);
     }
 
-    public Translation2d toTranslation()
+    public Translation2 toTranslation()
     {
-        return new Translation2d(cos_angle_, sin_angle_);
+        return new Translation2(cos_angle_, sin_angle_);
     }
 
     @Override
-    public Rotation2d interpolate(final Rotation2d other, double x)
+    public Rotation2 interpolate(final Rotation2 other, double x)
     {
         if (x <= 0)
         {
-            return new Rotation2d(this);
+            return new Rotation2(this);
         }
         else if (x >= 1)
         {
-            return new Rotation2d(other);
+            return new Rotation2(other);
         }
         double angle_diff = inverse().rotateBy(other).getRadians();
-        return this.rotateBy(Rotation2d.fromRadians(angle_diff * x));
+        return this.rotateBy(Rotation2.fromRadians(angle_diff * x));
     }
 
     @Override
@@ -181,7 +181,7 @@ public class Rotation2d implements IRotation2d<Rotation2d>
     }
 
     @Override
-    public double distance(final Rotation2d other)
+    public double distance(final Rotation2 other)
     {
         return inverse().rotateBy(other).getRadians();
     }
@@ -189,13 +189,13 @@ public class Rotation2d implements IRotation2d<Rotation2d>
     @Override
     public boolean equals(final Object other)
     {
-        if (other == null || !(other instanceof Rotation2d))
+        if (other == null || !(other instanceof Rotation2))
             return false;
-        return distance((Rotation2d) other) < Util.kEpsilon;
+        return distance((Rotation2) other) < Util.kEpsilon;
     }
 
     @Override
-    public Rotation2d getRotation()
+    public Rotation2 getRotation()
     {
         return this;
     }

@@ -1,10 +1,10 @@
 package com.spartronics4915.frc2019.planners;
 
 import com.spartronics4915.frc2019.Constants;
-import com.spartronics4915.lib.geometry.Pose2d;
-import com.spartronics4915.lib.geometry.Pose2dWithCurvature;
-import com.spartronics4915.lib.geometry.Rotation2d;
-import com.spartronics4915.lib.geometry.Translation2d;
+import com.spartronics4915.lib.geometry.Pose2;
+import com.spartronics4915.lib.geometry.Pose2WithCurvature;
+import com.spartronics4915.lib.geometry.Rotation2;
+import com.spartronics4915.lib.geometry.Translation2;
 import com.spartronics4915.lib.physics.DCMotorTransmission;
 import com.spartronics4915.lib.physics.DifferentialDrive;
 import com.spartronics4915.lib.trajectory.*;
@@ -46,11 +46,11 @@ public class DriveMotionPlanner implements CSVWritable
 
     final DifferentialDrive mModel;
 
-    TrajectoryIterator<TimedState<Pose2dWithCurvature>> mCurrentTrajectory;
+    TrajectoryIterator<TimedState<Pose2WithCurvature>> mCurrentTrajectory;
     boolean mIsReversed = false;
     double mLastTime = Double.POSITIVE_INFINITY;
-    public TimedState<Pose2dWithCurvature> mSetpoint = new TimedState<>(Pose2dWithCurvature.identity());
-    Pose2d mError = Pose2d.identity();
+    public TimedState<Pose2WithCurvature> mSetpoint = new TimedState<>(Pose2WithCurvature.identity());
+    Pose2 mError = Pose2.identity();
     Output mOutput = new Output();
 
     DifferentialDrive.ChassisState prev_velocity_ = new DifferentialDrive.ChassisState();
@@ -78,7 +78,7 @@ public class DriveMotionPlanner implements CSVWritable
             vIntercept);
     }
 
-    public void setTrajectory(final TrajectoryIterator<TimedState<Pose2dWithCurvature>> trajectory)
+    public void setTrajectory(final TrajectoryIterator<TimedState<Pose2WithCurvature>> trajectory)
     {
         mCurrentTrajectory = trajectory;
         mSetpoint = trajectory.getState();
@@ -99,15 +99,15 @@ public class DriveMotionPlanner implements CSVWritable
 
     public void reset()
     {
-        mError = Pose2d.identity();
+        mError = Pose2.identity();
         mOutput = new Output();
         mLastTime = Double.POSITIVE_INFINITY;
     }
 
-    public Trajectory<TimedState<Pose2dWithCurvature>> generateTrajectory(
+    public Trajectory<TimedState<Pose2WithCurvature>> generateTrajectory(
             boolean reversed,
-            final List<Pose2d> waypoints,
-            final List<TimingConstraint<Pose2dWithCurvature>> constraints,
+            final List<Pose2> waypoints,
+            final List<TimingConstraint<Pose2WithCurvature>> constraints,
             double max_vel, // inches/s
             double max_accel, // inches/s^2
             double max_voltage)
@@ -115,18 +115,18 @@ public class DriveMotionPlanner implements CSVWritable
         return generateTrajectory(reversed, waypoints, constraints, 0.0, 0.0, max_vel, max_accel, max_voltage);
     }
 
-    public Trajectory<TimedState<Pose2dWithCurvature>> generateTrajectory(
+    public Trajectory<TimedState<Pose2WithCurvature>> generateTrajectory(
             boolean reversed,
-            final List<Pose2d> waypoints,
-            final List<TimingConstraint<Pose2dWithCurvature>> constraints,
+            final List<Pose2> waypoints,
+            final List<TimingConstraint<Pose2WithCurvature>> constraints,
             double start_vel,
             double end_vel,
             double max_vel, // inches/s
             double max_accel, // inches/s^2
             double max_voltage)
     {
-        List<Pose2d> waypoints_maybe_flipped = waypoints;
-        final Pose2d flip = Pose2d.fromRotation(new Rotation2d(-1, 0, false));
+        List<Pose2> waypoints_maybe_flipped = waypoints;
+        final Pose2 flip = Pose2.fromRotation(new Rotation2(-1, 0, false));
         // TODO re-architect the spline generator to support reverse.
         if (reversed)
         {
@@ -138,31 +138,31 @@ public class DriveMotionPlanner implements CSVWritable
         }
 
         // Create a trajectory from splines.
-        Trajectory<Pose2dWithCurvature> trajectory = TrajectoryUtil.trajectoryFromSplineWaypoints(
+        Trajectory<Pose2WithCurvature> trajectory = TrajectoryUtil.trajectoryFromSplineWaypoints(
                 waypoints_maybe_flipped, kMaxDx, kMaxDy, kMaxDTheta);
 
         if (reversed)
         {
-            List<Pose2dWithCurvature> flipped = new ArrayList<>(trajectory.length());
+            List<Pose2WithCurvature> flipped = new ArrayList<>(trajectory.length());
             for (int i = 0; i < trajectory.length(); ++i)
             {
-                flipped.add(new Pose2dWithCurvature(trajectory.getState(i).getPose().transformBy(flip), -trajectory
+                flipped.add(new Pose2WithCurvature(trajectory.getState(i).getPose().transformBy(flip), -trajectory
                         .getState(i).getCurvature(), trajectory.getState(i).getDCurvatureDs()));
             }
             trajectory = new Trajectory<>(flipped);
         }
         // Create the constraint that the robot must be able to traverse the trajectory without ever applying more
         // than the specified voltage.
-        final DifferentialDriveDynamicsConstraint<Pose2dWithCurvature> drive_constraints =
+        final DifferentialDriveDynamicsConstraint<Pose2WithCurvature> drive_constraints =
                 new DifferentialDriveDynamicsConstraint<>(mModel, max_voltage);
-        List<TimingConstraint<Pose2dWithCurvature>> all_constraints = new ArrayList<>();
+        List<TimingConstraint<Pose2WithCurvature>> all_constraints = new ArrayList<>();
         all_constraints.add(drive_constraints);
         if (constraints != null)
         {
             all_constraints.addAll(constraints);
         }
         // Generate the timed trajectory.
-        Trajectory<TimedState<Pose2dWithCurvature>> timed_trajectory = TimingUtil.timeParameterizeTrajectory(reversed, new DistanceView<>(trajectory),
+        Trajectory<TimedState<Pose2WithCurvature>> timed_trajectory = TimingUtil.timeParameterizeTrajectory(reversed, new DistanceView<>(trajectory),
                 kMaxDx, all_constraints, start_vel, end_vel, max_vel, max_accel);
         return timed_trajectory;
     }
@@ -219,7 +219,7 @@ public class DriveMotionPlanner implements CSVWritable
         }
     }
 
-    protected Output updatePID(DifferentialDrive.DriveDynamics dynamics, Pose2d current_state)
+    protected Output updatePID(DifferentialDrive.DriveDynamics dynamics, Pose2 current_state)
     {
         DifferentialDrive.ChassisState adjusted_velocity = new DifferentialDrive.ChassisState();
         // Feedback on longitudinal error (distance).
@@ -248,11 +248,11 @@ public class DriveMotionPlanner implements CSVWritable
                 left_voltage, right_voltage);
     }
 
-    protected Output updatePurePursuit(DifferentialDrive.DriveDynamics dynamics, Pose2d current_state)
+    protected Output updatePurePursuit(DifferentialDrive.DriveDynamics dynamics, Pose2 current_state)
     {
         double lookahead_time = Constants.kPathLookaheadTime;
         final double kLookaheadSearchDt = 0.01;
-        TimedState<Pose2dWithCurvature> lookahead_state = mCurrentTrajectory.preview(lookahead_time).state();
+        TimedState<Pose2WithCurvature> lookahead_state = mCurrentTrajectory.preview(lookahead_time).state();
         double actual_lookahead_distance = mSetpoint.state().distance(lookahead_state.state());
         while (actual_lookahead_distance < Constants.kPathMinLookaheadDistance &&
                 mCurrentTrajectory.getRemainingProgress() > lookahead_time)
@@ -263,8 +263,8 @@ public class DriveMotionPlanner implements CSVWritable
         }
         if (actual_lookahead_distance < Constants.kPathMinLookaheadDistance)
         {
-            lookahead_state = new TimedState<>(new Pose2dWithCurvature(lookahead_state.state()
-                    .getPose().transformBy(Pose2d.fromTranslation(new Translation2d(
+            lookahead_state = new TimedState<>(new Pose2WithCurvature(lookahead_state.state()
+                    .getPose().transformBy(Pose2.fromTranslation(new Translation2(
                             (mIsReversed ? -1.0 : 1.0) * (Constants.kPathMinLookaheadDistance -
                                     actual_lookahead_distance),
                             0.0))),
@@ -276,7 +276,7 @@ public class DriveMotionPlanner implements CSVWritable
         adjusted_velocity.linear = dynamics.chassis_velocity.linear + Constants.kPathKX * Units.inches_to_meters(mError.getTranslation().x());
 
         // Use pure pursuit to peek ahead along the trajectory and generate a new curvature.
-        final PurePursuitController.Arc<Pose2dWithCurvature> arc = new PurePursuitController.Arc<>(current_state,
+        final PurePursuitController.Arc<Pose2WithCurvature> arc = new PurePursuitController.Arc<>(current_state,
                 lookahead_state.state());
 
         double curvature = 1.0 / Units.inches_to_meters(arc.radius);
@@ -296,7 +296,7 @@ public class DriveMotionPlanner implements CSVWritable
                 dynamics.wheel_acceleration.right, dynamics.voltage.left, dynamics.voltage.right);
     }
 
-    protected Output updateNonlinearFeedback(DifferentialDrive.DriveDynamics dynamics, Pose2d current_state)
+    protected Output updateNonlinearFeedback(DifferentialDrive.DriveDynamics dynamics, Pose2 current_state)
     {
         // Implements eqn. 5.12 from https://www.dis.uniroma1.it/~labrob/pub/papers/Ramsete01.pdf
         final double kBeta = 2.0; // >0.
@@ -332,7 +332,7 @@ public class DriveMotionPlanner implements CSVWritable
                 dynamics.wheel_acceleration.right, feedforward_voltages.left, feedforward_voltages.right);
     }
 
-    public Output update(double timestamp, Pose2d current_state)
+    public Output update(double timestamp, Pose2 current_state)
     {
         if (mCurrentTrajectory == null)
             return new Output();
@@ -344,7 +344,7 @@ public class DriveMotionPlanner implements CSVWritable
 
         mDt = timestamp - mLastTime;
         mLastTime = timestamp;
-        TrajectorySamplePoint<TimedState<Pose2dWithCurvature>> sample_point = mCurrentTrajectory.advance(mDt);
+        TrajectorySamplePoint<TimedState<Pose2WithCurvature>> sample_point = mCurrentTrajectory.advance(mDt);
         mSetpoint = sample_point.state();
 
         if (!mCurrentTrajectory.isDone())
@@ -399,12 +399,12 @@ public class DriveMotionPlanner implements CSVWritable
         return mCurrentTrajectory != null && mCurrentTrajectory.isDone();
     }
 
-    public Pose2d error()
+    public Pose2 error()
     {
         return mError;
     }
 
-    public TimedState<Pose2dWithCurvature> setpoint()
+    public TimedState<Pose2WithCurvature> setpoint()
     {
         return mSetpoint;
     }

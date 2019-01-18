@@ -3,8 +3,8 @@ package com.spartronics4915.lib.lidar.icp;
 import com.spartronics4915.lib.lidar.icp.Point;
 import com.spartronics4915.lib.lidar.*; 
 import com.spartronics4915.lib.util.RobotStateMap;
-import com.spartronics4915.lib.geometry.Pose2d;
-import com.spartronics4915.lib.geometry.Twist2d;
+import com.spartronics4915.lib.geometry.Pose2;
+import com.spartronics4915.lib.geometry.Twist2;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,8 +32,8 @@ public class ICPTest
         RobotStateMap stateMap = new RobotStateMap();
 
         // robot starts at 0, 0
-        stateMap.addObservations(t, new Pose2d(), 
-                        Twist2d.identity(), Twist2d.identity());
+        stateMap.addObservations(t, new Pose2(), 
+                        Twist2.identity(), Twist2.identity());
 
         // scan1 
         //      ellipse (100, 300) centered at robot origin (0, 0)

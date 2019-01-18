@@ -6,7 +6,6 @@ import java.nio.file.Paths;
 public class LibConstants
 {
 	/* Lidar non-game settings ----*/
-	public static final int kLidarScanSize = 400;
     public static final int kLidarNumScansToStore = 10;
     public static final double kLidarRestartTime = 2.5;
     public static final String kLidarDriverPath = Paths.get(

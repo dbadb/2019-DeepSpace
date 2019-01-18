@@ -1,23 +1,24 @@
 package com.spartronics4915.lib.lidar.icp;
 
+import com.spartronics4915.lib.geometry.Point2;
+import com.spartronics4915.lib.geometry.Transform2;
 import java.util.ArrayList;
 
 public class PointCloudReferenceModel implements IReferenceModel
 {
+    private Iterable<Point2> mPointCloud;
 
-    private Iterable<Point> mPointCloud;
-
-    public PointCloudReferenceModel(Iterable<Point> pointCloud)
+    public PointCloudReferenceModel(Iterable<Point2> pointCloud)
     {
         mPointCloud = pointCloud;
     }
 
     @Override
-    public Point getClosestPoint(Point refPnt)
+    public Point2 getClosestPoint(Point2 refPnt)
     {
         double minDist = Double.MAX_VALUE;
-        Point minPnt = null;
-        for (Point testPnt : mPointCloud)
+        Point2 minPnt = null;
+        for (Point2 testPnt : mPointCloud)
         {
             double dist = refPnt.getDistanceSq(testPnt);
             if (dist < minDist)
@@ -30,10 +31,10 @@ public class PointCloudReferenceModel implements IReferenceModel
     }
 
     @Override
-    public void transformBy(Transform t)
+    public void transformBy(Transform2 t)
     {
-        ArrayList<Point> transformedPoints = new ArrayList<Point>();
-        for (Point p : mPointCloud)
+        ArrayList<Point2> transformedPoints = new ArrayList<Point2>();
+        for (Point2 p : mPointCloud)
         {
             transformedPoints.add(t.apply(p));
         }

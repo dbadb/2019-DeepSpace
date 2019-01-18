@@ -1,8 +1,8 @@
 package com.spartronics4915.lib.spline;
 
-import com.spartronics4915.lib.geometry.Pose2d;
-import com.spartronics4915.lib.geometry.Rotation2d;
-import com.spartronics4915.lib.geometry.Translation2d;
+import com.spartronics4915.lib.geometry.Pose2;
+import com.spartronics4915.lib.geometry.Rotation2;
+import com.spartronics4915.lib.geometry.Translation2;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class QuinticHermiteSpline extends Spline
      * @param p0 The starting pose of the spline
      * @param p1 The ending pose of the spline
      */
-    public QuinticHermiteSpline(Pose2d p0, Pose2d p1)
+    public QuinticHermiteSpline(Pose2 p0, Pose2 p1)
     {
         double scale = 1.2 * p0.getTranslation().distance(p1.getTranslation());
         x0 = p0.getTranslation().x();
@@ -85,18 +85,18 @@ public class QuinticHermiteSpline extends Spline
         fy = y0;
     }
 
-    public Pose2d getStartPose()
+    public Pose2 getStartPose()
     {
-        return new Pose2d(
-                new Translation2d(x0, y0),
-                new Rotation2d(dx0, dy0, true));
+        return new Pose2(
+                new Translation2(x0, y0),
+                new Rotation2(dx0, dy0, true));
     }
 
-    public Pose2d getEndPose()
+    public Pose2 getEndPose()
     {
-        return new Pose2d(
-                new Translation2d(x1, y1),
-                new Rotation2d(dx1, dy1, true));
+        return new Pose2(
+                new Translation2(x1, y1),
+                new Rotation2(dx1, dy1, true));
     }
 
     /**
@@ -104,11 +104,11 @@ public class QuinticHermiteSpline extends Spline
      * @return the point on the spline for that t value
      */
     @Override
-    public Translation2d getPoint(double t)
+    public Translation2 getPoint(double t)
     {
         double x = ax * t * t * t * t * t + bx * t * t * t * t + cx * t * t * t + dx * t * t + ex * t + fx;
         double y = ay * t * t * t * t * t + by * t * t * t * t + cy * t * t * t + dy * t * t + ey * t + fy;
-        return new Translation2d(x, y);
+        return new Translation2(x, y);
     }
 
     private double dx(double t)
@@ -169,9 +169,9 @@ public class QuinticHermiteSpline extends Spline
     }
 
     @Override
-    public Rotation2d getHeading(double t)
+    public Rotation2 getHeading(double t)
     {
-        return new Rotation2d(dx(t), dy(t), true);
+        return new Rotation2(dx(t), dy(t), true);
     }
 
     /**
@@ -284,8 +284,8 @@ public class QuinticHermiteSpline extends Spline
 
         //minimize along the direction of the gradient
         //first calculate 3 points along the direction of the gradient
-        Translation2d p1, p2, p3;
-        p2 = new Translation2d(0, sumDCurvature2(splines)); //middle point is at the current location
+        Translation2 p1, p2, p3;
+        p2 = new Translation2(0, sumDCurvature2(splines)); //middle point is at the current location
 
         for (int i = 0; i < splines.size() - 1; ++i)
         { //first point is offset from the middle location by -stepSize
@@ -308,7 +308,7 @@ public class QuinticHermiteSpline extends Spline
             splines.get(i).computeCoefficients();
             splines.get(i + 1).computeCoefficients();
         }
-        p1 = new Translation2d(-kStepSize, sumDCurvature2(splines));
+        p1 = new Translation2(-kStepSize, sumDCurvature2(splines));
 
         for (int i = 0; i < splines.size() - 1; ++i)
         { //last point is offset from the middle location by +stepSize
@@ -329,7 +329,7 @@ public class QuinticHermiteSpline extends Spline
             splines.get(i + 1).computeCoefficients();
         }
 
-        p3 = new Translation2d(kStepSize, sumDCurvature2(splines));
+        p3 = new Translation2(kStepSize, sumDCurvature2(splines));
 
         double stepSize = fitParabola(p1, p2, p3); //approximate step size to minimize sumDCurvature2 along the gradient
 
@@ -361,7 +361,7 @@ public class QuinticHermiteSpline extends Spline
      *
      * @return the x coordinate of the vertex of the parabola
      */
-    private static double fitParabola(Translation2d p1, Translation2d p2, Translation2d p3)
+    private static double fitParabola(Translation2 p1, Translation2 p2, Translation2 p3)
     {
         double A = (p3.x() * (p2.y() - p1.y()) + p2.x() * (p1.y() - p3.y()) + p1.x() * (p3.y() - p2.y()));
         double B = (p3.x() * p3.x() * (p1.y() - p2.y()) + p2.x() * p2.x() * (p3.y() - p1.y()) + p1.x() * p1.x() *

@@ -8,12 +8,12 @@ import java.text.DecimalFormat;
  * A translation in a 2d coordinate frame. Translations are simply shifts in an
  * (x, y) plane.
  */
-public class Translation2d implements ITranslation2d<Translation2d>
+public class Translation2 implements ITranslation2<Translation2>
 {
 
-    protected static final Translation2d kIdentity = new Translation2d();
+    protected static final Translation2 kIdentity = new Translation2();
 
-    public static final Translation2d identity()
+    public static final Translation2 identity()
     {
         return kIdentity;
     }
@@ -21,25 +21,25 @@ public class Translation2d implements ITranslation2d<Translation2d>
     protected final double x_;
     protected final double y_;
 
-    public Translation2d()
+    public Translation2()
     {
         x_ = 0;
         y_ = 0;
     }
 
-    public Translation2d(double x, double y)
+    public Translation2(double x, double y)
     {
         x_ = x;
         y_ = y;
     }
 
-    public Translation2d(final Translation2d other)
+    public Translation2(final Translation2 other)
     {
         x_ = other.x_;
         y_ = other.y_;
     }
 
-    public Translation2d(final Translation2d start, final Translation2d end)
+    public Translation2(final Translation2 start, final Translation2 end)
     {
         x_ = end.x_ - start.x_;
         y_ = end.y_ - start.y_;
@@ -70,69 +70,79 @@ public class Translation2d implements ITranslation2d<Translation2d>
         return y_;
     }
 
+    public Point2 asPoint2()
+    {
+        return new Point2(x_, y_);
+    }
+
     /**
-     * We can compose Translation2d's by adding together the x and y shifts.
+     * We can compose Translation2's by adding together the x and y shifts.
      *
      * @param other The other translation to add.
      * @return The combined effect of translating by this object and the other.
      */
-    public Translation2d translateBy(final Translation2d other)
+    public Translation2 translateBy(final Translation2 other)
     {
-        return new Translation2d(x_ + other.x_, y_ + other.y_);
+        return new Translation2(x_ + other.x_, y_ + other.y_);
+    }
+
+    public Translation2 translateBy(final double x, final double y)
+    {
+        return new Translation2(x_ + x, y_ + y);
     }
 
     /**
-     * We can also rotate Translation2d's. See:
+     * We can also rotate Translation2's. See:
      * https://en.wikipedia.org/wiki/Rotation_matrix
      *
      * @param rotation The rotation to apply.
      * @return This translation rotated by rotation.
      */
-    public Translation2d rotateBy(final Rotation2d rotation)
+    public Translation2 rotateBy(final Rotation2 rotation)
     {
-        return new Translation2d(x_ * rotation.cos() - y_ * rotation.sin(), x_ * rotation.sin() + y_ * rotation.cos());
+        return new Translation2(x_ * rotation.cos() - y_ * rotation.sin(), x_ * rotation.sin() + y_ * rotation.cos());
     }
 
-    public Rotation2d direction()
+    public Rotation2 direction()
     {
-        return new Rotation2d(x_, y_, true);
+        return new Rotation2(x_, y_, true);
     }
 
     /**
-     * The inverse simply means a Translation2d that "undoes" this object.
+     * The inverse simply means a Translation2 that "undoes" this object.
      *
      * @return Translation by -x and -y.
      */
-    public Translation2d inverse()
+    public Translation2 inverse()
     {
-        return new Translation2d(-x_, -y_);
+        return new Translation2(-x_, -y_);
     }
 
     @Override
-    public Translation2d interpolate(final Translation2d other, double x)
+    public Translation2 interpolate(final Translation2 other, double x)
     {
         if (x <= 0)
         {
-            return new Translation2d(this);
+            return new Translation2(this);
         }
         else if (x >= 1)
         {
-            return new Translation2d(other);
+            return new Translation2(other);
         }
         return extrapolate(other, x);
     }
 
-    public Translation2d extrapolate(final Translation2d other, double x)
+    public Translation2 extrapolate(final Translation2 other, double x)
     {
-        return new Translation2d(x * (other.x_ - x_) + x_, x * (other.y_ - y_) + y_);
+        return new Translation2(x * (other.x_ - x_) + x_, x * (other.y_ - y_) + y_);
     }
 
-    public Translation2d scale(double s)
+    public Translation2 scale(double s)
     {
-        return new Translation2d(x_ * s, y_ * s);
+        return new Translation2(x_ * s, y_ * s);
     }
 
-    public boolean epsilonEquals(final Translation2d other, double epsilon)
+    public boolean epsilonEquals(final Translation2 other, double epsilon)
     {
         return Util.epsilonEquals(x(), other.x(), epsilon) && Util.epsilonEquals(y(), other.y(), epsilon);
     }
@@ -151,28 +161,28 @@ public class Translation2d implements ITranslation2d<Translation2d>
         return fmt.format(x_) + "," + fmt.format(y_);
     }
 
-    public static double dot(final Translation2d a, final Translation2d b)
+    public static double dot(final Translation2 a, final Translation2 b)
     {
         return a.x_ * b.x_ + a.y_ * b.y_;
     }
 
-    public static Rotation2d getAngle(final Translation2d a, final Translation2d b)
+    public static Rotation2 getAngle(final Translation2 a, final Translation2 b)
     {
         double cos_angle = dot(a, b) / (a.norm() * b.norm());
         if (Double.isNaN(cos_angle))
         {
-            return new Rotation2d();
+            return new Rotation2();
         }
-        return Rotation2d.fromRadians(Math.acos(Math.min(1.0, Math.max(cos_angle, -1.0))));
+        return Rotation2.fromRadians(Math.acos(Math.min(1.0, Math.max(cos_angle, -1.0))));
     }
 
-    public static double cross(final Translation2d a, final Translation2d b)
+    public static double cross(final Translation2 a, final Translation2 b)
     {
         return a.x_ * b.y_ - a.y_ * b.x_;
     }
 
     @Override
-    public double distance(final Translation2d other)
+    public double distance(final Translation2 other)
     {
         return inverse().translateBy(other).norm();
     }
@@ -180,13 +190,13 @@ public class Translation2d implements ITranslation2d<Translation2d>
     @Override
     public boolean equals(final Object other)
     {
-        if (other == null || !(other instanceof Translation2d))
+        if (other == null || !(other instanceof Translation2))
             return false;
-        return distance((Translation2d) other) < Util.kEpsilon;
+        return distance((Translation2) other) < Util.kEpsilon;
     }
 
     @Override
-    public Translation2d getTranslation()
+    public Translation2 getTranslation()
     {
         return this;
     }

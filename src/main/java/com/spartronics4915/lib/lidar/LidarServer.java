@@ -181,7 +181,7 @@ public class LidarServer
                 double distance = Double.parseDouble(parts[2]);
                 if (distance != 0 || isNewScan)
                 {
-                    mLidarProcessor.addPoint(normalizedTs, angle, distance, isNewScan);
+                    mLidarProcessor.addSample(normalizedTs, angle, distance, isNewScan);
                 }
             } 
             catch (java.lang.NumberFormatException e)

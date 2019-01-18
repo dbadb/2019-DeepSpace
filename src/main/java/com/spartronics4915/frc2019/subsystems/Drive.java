@@ -10,9 +10,9 @@ import com.spartronics4915.lib.util.ILoop;
 import com.spartronics4915.frc2019.planners.DriveMotionPlanner;
 import com.spartronics4915.lib.drivers.TalonSRXChecker;
 import com.spartronics4915.lib.drivers.TalonSRXFactory;
-import com.spartronics4915.lib.geometry.Pose2d;
-import com.spartronics4915.lib.geometry.Pose2dWithCurvature;
-import com.spartronics4915.lib.geometry.Rotation2d;
+import com.spartronics4915.lib.geometry.Pose2;
+import com.spartronics4915.lib.geometry.Pose2WithCurvature;
+import com.spartronics4915.lib.geometry.Rotation2;
 import com.spartronics4915.lib.trajectory.TrajectoryIterator;
 import com.spartronics4915.lib.trajectory.timing.TimedState;
 import com.spartronics4915.lib.util.DriveSignal;
@@ -40,7 +40,7 @@ public class Drive extends Subsystem
     private boolean mIsBrakeMode;
     private ReflectingCSVWriter<PeriodicIO> mCSVWriter = null;
     private DriveMotionPlanner mMotionPlanner;
-    private Rotation2d mGyroOffset = Rotation2d.identity();
+    private Rotation2 mGyroOffset = Rotation2.identity();
     private boolean mOverrideTrajectory = false;
 
     private final ILoop mLoop = new ILoop()
@@ -262,7 +262,7 @@ public class Drive extends Subsystem
         mRightMaster.selectProfileSlot(Constants.kVelocityPIDSlot, 0);
     }
 
-    public synchronized void setTrajectory(TrajectoryIterator<TimedState<Pose2dWithCurvature>> trajectory)
+    public synchronized void setTrajectory(TrajectoryIterator<TimedState<Pose2WithCurvature>> trajectory)
     {
         if (mMotionPlanner != null)
         {
@@ -302,16 +302,16 @@ public class Drive extends Subsystem
         }
     }
 
-    public synchronized Rotation2d getHeading()
+    public synchronized Rotation2 getHeading()
     {
         return mPeriodicIO.gyro_heading;
     }
 
-    public synchronized void setHeading(Rotation2d heading)
+    public synchronized void setHeading(Rotation2 heading)
     {
         logDebug("SET HEADING: " + heading.getDegrees());
 
-        mGyroOffset = heading.rotateBy(Rotation2d.fromDegrees(mPigeon.getFusedHeading()).inverse());
+        mGyroOffset = heading.rotateBy(Rotation2.fromDegrees(mPigeon.getFusedHeading()).inverse());
         logDebug("Gyro offset: " + mGyroOffset.getDegrees());
 
         mPeriodicIO.gyro_heading = heading;
@@ -368,7 +368,7 @@ public class Drive extends Subsystem
     @Override
     public void zeroSensors()
     {
-        setHeading(Rotation2d.identity());
+        setHeading(Rotation2.identity());
         resetEncoders();
     }
 
@@ -502,7 +502,7 @@ public class Drive extends Subsystem
         mPeriodicIO.right_position_ticks = mRightMaster.getSelectedSensorPosition(0);
         mPeriodicIO.left_velocity_ticks_per_100ms = mLeftMaster.getSelectedSensorVelocity(0);
         mPeriodicIO.right_velocity_ticks_per_100ms = mRightMaster.getSelectedSensorVelocity(0);
-        mPeriodicIO.gyro_heading = Rotation2d.fromDegrees(mPigeon.getFusedHeading()).rotateBy(mGyroOffset);
+        mPeriodicIO.gyro_heading = Rotation2.fromDegrees(mPigeon.getFusedHeading()).rotateBy(mGyroOffset);
 
         double deltaLeftTicks = ((mPeriodicIO.left_position_ticks - prevLeftTicks) / Constants.kDriveEncoderPPR) * Math.PI;
         if (deltaLeftTicks > 0.0) // XXX: Why do we have this if statement? (And the corresponding one for the right side)
@@ -750,8 +750,8 @@ public class Drive extends Subsystem
         public double right_distance;
         public int left_velocity_ticks_per_100ms;
         public int right_velocity_ticks_per_100ms;
-        public Rotation2d gyro_heading = Rotation2d.identity();
-        public Pose2d error = Pose2d.identity();
+        public Rotation2 gyro_heading = Rotation2.identity();
+        public Pose2 error = Pose2.identity();
 
         // OUTPUTS
         public double left_demand;
@@ -760,6 +760,6 @@ public class Drive extends Subsystem
         public double right_accel;
         public double left_feedforward;
         public double right_feedforward;
-        public TimedState<Pose2dWithCurvature> path_setpoint = new TimedState<Pose2dWithCurvature>(Pose2dWithCurvature.identity());
+        public TimedState<Pose2WithCurvature> path_setpoint = new TimedState<Pose2WithCurvature>(Pose2WithCurvature.identity());
     }
 }

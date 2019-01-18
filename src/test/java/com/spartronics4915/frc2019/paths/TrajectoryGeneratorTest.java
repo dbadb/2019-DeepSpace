@@ -1,8 +1,8 @@
 package com.spartronics4915.frc2019.paths;
 
-import com.spartronics4915.lib.geometry.Pose2d;
-import com.spartronics4915.lib.geometry.Pose2dWithCurvature;
-import com.spartronics4915.lib.geometry.Twist2d;
+import com.spartronics4915.lib.geometry.Pose2;
+import com.spartronics4915.lib.geometry.Pose2WithCurvature;
+import com.spartronics4915.lib.geometry.Twist2;
 import com.spartronics4915.lib.trajectory.TimedView;
 import com.spartronics4915.lib.trajectory.TrajectoryIterator;
 import com.spartronics4915.lib.trajectory.timing.TimedState;
@@ -21,16 +21,16 @@ public class TrajectoryGeneratorTest
                         boolean shouldBeReversed)
         {
                 assertEquals(mirrored.left.length(), mirrored.right.length());
-                TrajectoryIterator<TimedState<Pose2dWithCurvature>> left_iterator = new TrajectoryIterator<>(new TimedView<>(mirrored.left));
-                TrajectoryIterator<TimedState<Pose2dWithCurvature>> right_iterator = new TrajectoryIterator<>(new TimedView<>(mirrored.right));
+                TrajectoryIterator<TimedState<Pose2WithCurvature>> left_iterator = new TrajectoryIterator<>(new TimedView<>(mirrored.left));
+                TrajectoryIterator<TimedState<Pose2WithCurvature>> right_iterator = new TrajectoryIterator<>(new TimedView<>(mirrored.right));
 
                 final double dt = 0.05;
-                TimedState<Pose2dWithCurvature> prev_left = null;
-                TimedState<Pose2dWithCurvature> prev_right = null;
+                TimedState<Pose2WithCurvature> prev_left = null;
+                TimedState<Pose2WithCurvature> prev_right = null;
                 while (!left_iterator.isDone() && !right_iterator.isDone())
                 {
-                        TimedState<Pose2dWithCurvature> left_state = left_iterator.getState();
-                        TimedState<Pose2dWithCurvature> right_state = right_iterator.getState();
+                        TimedState<Pose2WithCurvature> left_state = left_iterator.getState();
+                        TimedState<Pose2WithCurvature> right_state = right_iterator.getState();
 
                         assertEquals(left_state.t(), right_state.t(), kTestEpsilon);
                         assertEquals(left_state.velocity(), right_state.velocity(), kTestEpsilon);
@@ -43,9 +43,9 @@ public class TrajectoryGeneratorTest
                         {
                                 // Check there are no angle discontinuities.
                                 final double kMaxReasonableChangeInAngle = 0.3; // rad
-                                Twist2d left_change = Pose2d.log(prev_left.state().getPose().inverse().transformBy(left_state.state()
+                                Twist2 left_change = Pose2.log(prev_left.state().getPose().inverse().transformBy(left_state.state()
                                                 .getPose()));
-                                Twist2d right_change = Pose2d.log(prev_right.state().getPose().inverse().transformBy(right_state
+                                Twist2 right_change = Pose2.log(prev_right.state().getPose().inverse().transformBy(right_state
                                                 .state().getPose()));
                                 assertTrue(Math.abs(left_change.dtheta) < kMaxReasonableChangeInAngle);
                                 assertTrue(Math.abs(right_change.dtheta) < kMaxReasonableChangeInAngle);

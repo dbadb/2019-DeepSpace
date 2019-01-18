@@ -1,7 +1,7 @@
 package com.spartronics4915.lib.util;
 
-import com.spartronics4915.lib.geometry.Pose2d;
-import com.spartronics4915.lib.geometry.Twist2d;
+import com.spartronics4915.lib.geometry.Pose2;
+import com.spartronics4915.lib.geometry.Twist2;
 import com.spartronics4915.lib.util.InterpolatingDouble;
 import com.spartronics4915.lib.util.InterpolatingTreeMap;
 
@@ -13,15 +13,15 @@ public class RobotStateMap
 
     static public class State implements Interpolable<State>
     {
-        public Pose2d pose;
-        public Twist2d integrationVelocity, predictedVelocity;
+        public Pose2 pose;
+        public Twist2 integrationVelocity, predictedVelocity;
         public double timestamp;
 
         public State()
         {
-            this.pose = new Pose2d();
-            this.integrationVelocity = Twist2d.identity();
-            this.predictedVelocity = Twist2d.identity();
+            this.pose = new Pose2();
+            this.integrationVelocity = Twist2.identity();
+            this.predictedVelocity = Twist2.identity();
             this.timestamp =  0;
         }
 
@@ -33,7 +33,7 @@ public class RobotStateMap
             this.timestamp = other.timestamp;
         }
 
-        public State(Pose2d pose, Twist2d iVel, Twist2d pVel, double ts)
+        public State(Pose2 pose, Twist2 iVel, Twist2 pVel, double ts)
         {
             this.pose = pose;
             this.integrationVelocity = iVel;
@@ -41,11 +41,11 @@ public class RobotStateMap
             this.timestamp = ts;
         }
 
-        public State(Pose2d p, double ts)
+        public State(Pose2 p, double ts)
         {
             this.pose = p;
-            this.integrationVelocity = Twist2d.identity();
-            this.predictedVelocity = Twist2d.identity();
+            this.integrationVelocity = Twist2.identity();
+            this.predictedVelocity = Twist2.identity();
             this.timestamp = ts;
         }
 
@@ -75,13 +75,13 @@ public class RobotStateMap
 
     public RobotStateMap()
     {
-        reset(0, new Pose2d());
+        reset(0, new Pose2());
     }
 
     /**
      * Resets the field to robot transform (robot's position on the field)
      */
-    public synchronized void reset(double startTime, Pose2d initialPose)
+    public synchronized void reset(double startTime, Pose2 initialPose)
     {
         mStateMap = new InterpolatingTreeMap<>(kObservationBufferSize);
         mStateMap.put(new InterpolatingDouble(startTime), 
@@ -95,9 +95,9 @@ public class RobotStateMap
     }
 
     public synchronized void addObservations(double timestamp, 
-                                            Pose2d pose,
-                                            Twist2d velI,
-                                            Twist2d velP)
+                                            Pose2 pose,
+                                            Twist2 velI,
+                                            Twist2 velP)
     {
         InterpolatingDouble ts = new InterpolatingDouble(timestamp);
         mStateMap.put(ts, new State(pose, velI, velP, timestamp));
@@ -123,12 +123,12 @@ public class RobotStateMap
      * Returns the robot's position on the field at a certain time. Linearly
      * interpolates between stored robot positions to fill in the gaps.
      */
-    public synchronized Pose2d getFieldToVehicle(double timestamp)
+    public synchronized Pose2 getFieldToVehicle(double timestamp)
     {
         return this.get(timestamp).pose;
     }
 
-    public synchronized Pose2d getLatestFieldToVehicle()
+    public synchronized Pose2 getLatestFieldToVehicle()
     {
         return mStateMap.lastEntry().getValue().pose;
     }

@@ -196,7 +196,7 @@ public class Robot extends TimedRobot
                 mAutoModeExecutor.stop();
             }
 
-            // RobotState.getInstance().reset(Timer.getFPGATimestamp(), Pose2d.identity()); Do not do this here 
+            // RobotState.getInstance().reset(Timer.getFPGATimestamp(), Pose2.identity()); Do not do this here 
             mEnabledLooper.start();
 
             mDrive.setVelocity(DriveSignal.NEUTRAL, DriveSignal.NEUTRAL); // Reset velocity setpoints

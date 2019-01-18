@@ -1,8 +1,8 @@
 package com.spartronics4915.lib.trajectory.timing;
 
-import com.spartronics4915.lib.geometry.ITranslation2d;
+import com.spartronics4915.lib.geometry.ITranslation2;
 import com.spartronics4915.lib.geometry.State;
-import com.spartronics4915.lib.geometry.Translation2d;
+import com.spartronics4915.lib.geometry.Translation2;
 import com.spartronics4915.lib.trajectory.DistanceView;
 import com.spartronics4915.lib.trajectory.Trajectory;
 import com.spartronics4915.lib.trajectory.timing.TimingConstraint.MinMaxAcceleration;
@@ -20,11 +20,11 @@ public class TimingUtilTest
 
     public static final double kTestEpsilon = Util.kEpsilon;
 
-    public static final List<Translation2d> kWaypoints = Arrays.asList(
-            new Translation2d(0.0, 0.0),
-            new Translation2d(24.0, 0.0),
-            new Translation2d(36.0, 12.0),
-            new Translation2d(60.0, 12.0));
+    public static final List<Translation2> kWaypoints = Arrays.asList(
+            new Translation2(0.0, 0.0),
+            new Translation2(24.0, 0.0),
+            new Translation2(36.0, 12.0),
+            new Translation2(60.0, 12.0));
 
     public <S extends State<S>> Trajectory<TimedState<S>> buildAndCheckTrajectory(final DistanceView<S> dist_view,
             double step_size,
@@ -75,21 +75,21 @@ public class TimingUtilTest
     @Test
     public void testNoConstraints()
     {
-        Trajectory<Translation2d> traj = new Trajectory<>(kWaypoints);
-        DistanceView<Translation2d> dist_view = new DistanceView<>(traj);
+        Trajectory<Translation2> traj = new Trajectory<>(kWaypoints);
+        DistanceView<Translation2> dist_view = new DistanceView<>(traj);
 
         // Triangle profile.
-        Trajectory<TimedState<Translation2d>> timed_traj = buildAndCheckTrajectory(dist_view, 1.0,
-                new ArrayList<TimingConstraint<Translation2d>>(), 0.0, 0.0, 20.0, 5.0);
+        Trajectory<TimedState<Translation2>> timed_traj = buildAndCheckTrajectory(dist_view, 1.0,
+                new ArrayList<TimingConstraint<Translation2>>(), 0.0, 0.0, 20.0, 5.0);
         System.out.println(timed_traj.toCSV());
 
         // Trapezoidal profile.
-        timed_traj = buildAndCheckTrajectory(dist_view, 1.0, new ArrayList<TimingConstraint<Translation2d>>(), 0.0, 0.0,
+        timed_traj = buildAndCheckTrajectory(dist_view, 1.0, new ArrayList<TimingConstraint<Translation2>>(), 0.0, 0.0,
                 10.0, 5.0);
         System.out.println(timed_traj.toCSV());
 
         // Trapezoidal profile with start and end velocities.
-        timed_traj = buildAndCheckTrajectory(dist_view, 1.0, new ArrayList<TimingConstraint<Translation2d>>(), 5.0, 2.0,
+        timed_traj = buildAndCheckTrajectory(dist_view, 1.0, new ArrayList<TimingConstraint<Translation2>>(), 5.0, 2.0,
                 10.0, 5.0);
         System.out.println(timed_traj.toCSV());
     }
@@ -97,10 +97,10 @@ public class TimingUtilTest
     @Test
     public void testConditionalVelocityConstraint()
     {
-        Trajectory<Translation2d> traj = new Trajectory<>(kWaypoints);
-        DistanceView<Translation2d> dist_view = new DistanceView<>(traj);
+        Trajectory<Translation2> traj = new Trajectory<>(kWaypoints);
+        DistanceView<Translation2> dist_view = new DistanceView<>(traj);
 
-        class ConditionalTimingConstraint<S extends ITranslation2d<S>> implements TimingConstraint<S>
+        class ConditionalTimingConstraint<S extends ITranslation2<S>> implements TimingConstraint<S>
         {
 
             @Override
@@ -125,7 +125,7 @@ public class TimingUtilTest
         }
 
         // Trapezoidal profile.
-        Trajectory<TimedState<Translation2d>> timed_traj = buildAndCheckTrajectory(dist_view, 1.0,
+        Trajectory<TimedState<Translation2>> timed_traj = buildAndCheckTrajectory(dist_view, 1.0,
                 Arrays.asList(new ConditionalTimingConstraint<>()), 0.0, 0.0, 10.0, 5.0);
         System.out.println(timed_traj.toCSV());
     }
@@ -133,10 +133,10 @@ public class TimingUtilTest
     @Test
     public void testConditionalAccelerationConstraint()
     {
-        Trajectory<Translation2d> traj = new Trajectory<>(kWaypoints);
-        DistanceView<Translation2d> dist_view = new DistanceView<>(traj);
+        Trajectory<Translation2> traj = new Trajectory<>(kWaypoints);
+        DistanceView<Translation2> dist_view = new DistanceView<>(traj);
 
-        class ConditionalTimingConstraint<S extends ITranslation2d<S>> implements TimingConstraint<S>
+        class ConditionalTimingConstraint<S extends ITranslation2<S>> implements TimingConstraint<S>
         {
 
             @Override
@@ -154,7 +154,7 @@ public class TimingUtilTest
         }
 
         // Trapezoidal profile.
-        Trajectory<TimedState<Translation2d>> timed_traj = buildAndCheckTrajectory(dist_view, 1.0,
+        Trajectory<TimedState<Translation2>> timed_traj = buildAndCheckTrajectory(dist_view, 1.0,
                 Arrays.asList(new ConditionalTimingConstraint<>()), 0.0, 0.0, 10.0, 5.0);
         System.out.println(timed_traj.toCSV());
     }
@@ -162,14 +162,14 @@ public class TimingUtilTest
     @Test
     public void testVelocityLimitRegionConstraint()
     {
-        Trajectory<Translation2d> traj = new Trajectory<>(kWaypoints);
-        DistanceView<Translation2d> dist_view = new DistanceView<>(traj);
+        Trajectory<Translation2> traj = new Trajectory<>(kWaypoints);
+        DistanceView<Translation2> dist_view = new DistanceView<>(traj);
 
-        VelocityLimitRegionConstraint<Translation2d> constraint = new VelocityLimitRegionConstraint<>(
-                new Translation2d(6.0, -6.0), new Translation2d(18.0, 6.0), 3.0);
+        VelocityLimitRegionConstraint<Translation2> constraint = new VelocityLimitRegionConstraint<>(
+                new Translation2(6.0, -6.0), new Translation2(18.0, 6.0), 3.0);
 
         // Trapezoidal profile.
-        Trajectory<TimedState<Translation2d>> timed_traj = buildAndCheckTrajectory(dist_view, 1.0,
+        Trajectory<TimedState<Translation2>> timed_traj = buildAndCheckTrajectory(dist_view, 1.0,
                 Arrays.asList(constraint), 0.0, 0.0, 10.0, 5.0);
         System.out.println(timed_traj.toCSV());
     }

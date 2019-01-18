@@ -1,11 +1,11 @@
 package com.spartronics4915.lib.trajectory.timing;
 
 import com.spartronics4915.lib.geometry.ICurvature;
-import com.spartronics4915.lib.geometry.IPose2d;
+import com.spartronics4915.lib.geometry.IPose2;
 import com.spartronics4915.lib.physics.DifferentialDrive;
 import com.spartronics4915.lib.util.Units;
 
-public class DifferentialDriveDynamicsConstraint<S extends IPose2d<S> & ICurvature<S>> implements TimingConstraint<S>
+public class DifferentialDriveDynamicsConstraint<S extends IPose2<S> & ICurvature<S>> implements TimingConstraint<S>
 {
 
     protected final DifferentialDrive drive_;

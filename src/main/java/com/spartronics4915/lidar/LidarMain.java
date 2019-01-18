@@ -4,9 +4,9 @@ import com.spartronics4915.lidar.Looper;
 import com.spartronics4915.lib.util.Logger;
 import com.spartronics4915.lib.util.RobotStateMap;
 import com.spartronics4915.lib.util.SegmentBuilder;
-import com.spartronics4915.lib.geometry.Pose2d;
-import com.spartronics4915.lib.geometry.Rotation2d;
-import com.spartronics4915.lib.geometry.Twist2d;
+import com.spartronics4915.lib.geometry.Pose2;
+import com.spartronics4915.lib.geometry.Rotation2;
+import com.spartronics4915.lib.geometry.Twist2;
 import com.spartronics4915.lib.lidar.LidarProcessor;
 import com.spartronics4915.lib.lidar.icp.Point;
 import com.spartronics4915.lib.lidar.icp.SegmentReferenceModel;
@@ -40,7 +40,7 @@ public class LidarMain
 
         mLooper = new Looper();
         mLidarProcessor = new LidarProcessor(LidarProcessor.RunMode.kRunAsTest, sReferenceModel,
-                sRobotStateMap, sRobotStateMap, new Pose2d(), () -> System.currentTimeMillis() / 1000d);
+                sRobotStateMap, sRobotStateMap, new Pose2(), () -> System.currentTimeMillis() / 1000d);
         mLooper.register(mLidarProcessor);
         boolean started = mLidarProcessor.isConnected();
         if(!started)

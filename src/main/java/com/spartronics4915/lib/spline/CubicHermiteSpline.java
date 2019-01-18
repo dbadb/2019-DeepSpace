@@ -1,8 +1,8 @@
 package com.spartronics4915.lib.spline;
 
-import com.spartronics4915.lib.geometry.Pose2d;
-import com.spartronics4915.lib.geometry.Rotation2d;
-import com.spartronics4915.lib.geometry.Translation2d;
+import com.spartronics4915.lib.geometry.Pose2;
+import com.spartronics4915.lib.geometry.Rotation2;
+import com.spartronics4915.lib.geometry.Translation2;
 
 /**
  * Temporary spline for testing
@@ -12,7 +12,7 @@ public class CubicHermiteSpline extends Spline
 
     private final double ax, bx, cx, dx, ay, by, cy, dy;
 
-    public CubicHermiteSpline(Pose2d p0, Pose2d p1)
+    public CubicHermiteSpline(Pose2 p0, Pose2 p1)
     {
         double x0, x1, dx0, dx1, y0, y1, dy0, dy1;
         double scale = 2 * p0.getTranslation().distance(p1.getTranslation());
@@ -35,19 +35,19 @@ public class CubicHermiteSpline extends Spline
     }
 
     @Override
-    public Translation2d getPoint(double t)
+    public Translation2 getPoint(double t)
     {
         final double x = t * t * t * ax + t * t * bx + t * cx + dx;
         final double y = t * t * t * ay + t * t * by + t * cy + dy;
-        return new Translation2d(x, y);
+        return new Translation2(x, y);
     }
 
     @Override
-    public Rotation2d getHeading(double t)
+    public Rotation2 getHeading(double t)
     {
         final double dx = 3 * t * t * ax + 2 * t * bx + cx;
         final double dy = 3 * t * t * ay + 2 * t * by + cy;
-        return new Rotation2d(dx, dy, true);
+        return new Rotation2(dx, dy, true);
     }
 
     @Override

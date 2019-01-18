@@ -22,14 +22,21 @@ class Ellipse2 implements Map2Entry
     @Override
     public Hit2 trace(Ray2 ray)
     {
-        Hit2 ret;
+        Hit2 ret = null;
         return ret;
     }
 
     @Override
     public Point2 nearestPt(Point2 p)
     {
-        Point2 ret;
+        Point2 ret = null;
         return ret;
     }
+
+    @Override
+    public boolean contains(Point2 p) 
+    {
+        return false;
+    }
+
 }

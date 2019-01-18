@@ -3,38 +3,9 @@ package com.spartronics4915.lib.geometry;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class Line2d
+public class Line2
 {
-
-    public double vx, vy, r; // vy*x - vx*y = r
-    public double x0, y0;
-
-    public Line2d(double vx, double vy, double r)
-    {
-        this.vx = vx;
-        this.vy = vy;
-        this.r = r;
-
-        x0 = vy * r;
-        y0 = -vx * r;
-    }
-
-    public Line2d(double vx, double vy, double x0, double y0)
-    {
-        this.vx = vx;
-        this.vy = vy;
-        this.x0 = x0;
-        this.y0 = y0;
-
-        r = vy * x0 - vx * y0;
-    }
-
-    public Line2d(Point2 p0, Point2 p1)
-    {
-        this(p1.x - p0.x, p1.y - p0.y, p0.x, p0.y);
-    }
-
-    public static Line2d getFitLine(Collection<Point2> points)
+    public static Line2 fitLine2(Collection<Point2> points)
     {
         int n = points.size();
 
@@ -65,7 +36,35 @@ public class Line2d
         double vx = 2 * sxy;
         double mag = Math.hypot(vx, vy);
         double r = (vy * xMean - vx * yMean) / mag;
-        return new Line2d(vx, vy, r);
+        return new Line2(vx, vy, r);
+    }
+
+    public double vx, vy, r; // vy*x - vx*y = r
+    public double x0, y0;
+
+    public Line2(double vx, double vy, double r)
+    {
+        this.vx = vx;
+        this.vy = vy;
+        this.r = r;
+
+        x0 = vy * r;
+        y0 = -vx * r;
+    }
+
+    public Line2(double vx, double vy, double x0, double y0)
+    {
+        this.vx = vx;
+        this.vy = vy;
+        this.x0 = x0;
+        this.y0 = y0;
+
+        r = vy * x0 - vx * y0;
+    }
+
+    public Line2(Point2 p0, Point2 p1)
+    {
+        this(p1.x - p0.x, p1.y - p0.y, p0.x, p0.y);
     }
 
     public double getDistance(Point2 p)
@@ -73,7 +72,7 @@ public class Line2d
         return Math.abs(vy * p.x - vx * p.y - r);
     }
 
-    public Seg2 getSegment(Collection<Point2> points)
+    public LineSeg2 getSegment(Collection<Point2> points)
     {
         double minT = Double.MAX_VALUE, maxT = -Double.MAX_VALUE;
         for (Point2 p : points)
@@ -84,7 +83,7 @@ public class Line2d
             if (t > maxT)
                 maxT = t;
         }
-        return new Seg2(this, minT, maxT);
+        return new LineSeg2(this, minT, maxT);
     }
 
     public double getT(double x, double y)

@@ -50,9 +50,9 @@ public class Transform2
                 p.x * sin + p.y * cos + ty);
     }
 
-    public Line2d apply(Line2d l)
+    public Line2 apply(Line2 l)
     {
-        return new Line2d(l.vx * cos - l.vy * sin,
+        return new Line2(l.vx * cos - l.vy * sin,
                 l.vx * sin + l.vy * cos,
                 l.x0 * cos - l.y0 * sin + tx,
                 l.x0 * sin + l.y0 * cos + ty);

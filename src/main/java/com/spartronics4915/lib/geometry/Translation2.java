@@ -6,7 +6,8 @@ import java.text.DecimalFormat;
 
 /**
  * A translation in a 2d coordinate frame. Translations are simply shifts in an
- * (x, y) plane.
+ * (x, y) plane.  In mathematical terms, this is a 2d vector as distict from
+ * a 2d point.
  */
 public class Translation2 implements ITranslation2<Translation2>
 {

@@ -2,11 +2,11 @@ package com.spartronics4915.lib.geometry;
 
 public class LineSeg2 implements Map2Entry
 {
-    public Line2d line;
+    public Line2 line;
     public double tMin, tMax;
     public Point2 pMin, pMax;
 
-    public LineSeg2(Line2d line, double tMin, double tMax)
+    public LineSeg2(Line2 line, double tMin, double tMax)
     {
         this.line = line;
         this.tMin = tMin;
@@ -17,14 +17,14 @@ public class LineSeg2 implements Map2Entry
 
     public LineSeg2(Point2 p0, Point2 p1)
     {
-        this(new Line2d(p0, p1), 0, 1);
+        this(new Line2(p0, p1), 0, 1);
         normalize();
     }
 
     @Override
     public Hit2 trace(Ray2 ray)
     {
-        Hit2 ret;
+        Hit2 ret = null;
         return ret;
     }
 
@@ -32,6 +32,12 @@ public class LineSeg2 implements Map2Entry
     public Point2 nearestPt(Point2 p)
     {
         return this.getClosestPoint(p);
+    }
+
+    @Override
+    public boolean contains(Point2 p)
+    {
+        return false; 
     }
 
     private void normalize()

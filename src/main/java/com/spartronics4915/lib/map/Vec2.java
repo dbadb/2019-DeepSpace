@@ -9,8 +9,14 @@ public class Vec2
 
     public Vec2()
     {
-        this.x = 0F;
-        this.y = 0F;
+        this.x = 0.f;
+        this.y = 0.f;
+    }
+    
+    public Vec2(Vec2 a)
+    {
+        this.x = a.x;
+        this.y = a.y;
     }
 
     public Vec2(float x, float y)
@@ -25,5 +31,58 @@ public class Vec2
         this.y = (float) y;
     }
 
+    public float normalize()
+    {
+        float len = (float) Math.hypot(this.x, this.y);
+        if(len > 0.f)
+        {
+            this.x /= len;
+            this.y /= len;
+        }
+        return len;
+    }
 
+    public static Vec2 normalize(Vec2 a)
+    {
+        Vec2 b = new Vec2(a);
+        b.normalize();
+        return b;
+    }
+
+    public float length()
+    {
+        return (float) Math.sqrt(this.lengthSq());
+    }
+
+    public float lengthSq()
+    {
+        return dot(this);
+    }
+
+    public float dot(Vec2 o)
+    {
+        return this.x*o.x + this.y*o.y;
+    }
+    
+    /**
+     * @return Vec2 that's perpendicular to this.
+     */
+    public Vec2 perp()
+    {
+        return new Vec2(this.y, -this.x);
+    }
+
+    /**
+     * @param o
+     * @return the cos of the angle between this and o's perpendicular
+     */
+    public float dotperp(Vec2 o)
+    {
+        return this.dot(o.perp());
+    }
+
+    public String toString()
+    {
+        return "Vec2(" + this.x + "," + this.y + ")";
+    }
 }

@@ -9,5 +9,15 @@ public interface IDriveControlBoard
 
     boolean getQuickTurn();
 
-    boolean getSwitchTurretMode();
+    boolean getReturnToDriverControl();
+
+    boolean getReverseDirection();
+
+    boolean getDriveToSelectedTarget();
+
+    boolean getTestButtonOne();
+
+    boolean getTestButtonTwo();
+
+    boolean getTestButtonThree();
 }

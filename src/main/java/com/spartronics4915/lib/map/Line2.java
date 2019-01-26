@@ -1,6 +1,6 @@
 package com.spartronics4915.lib.map;
 
-public class Line2 implements Map2Entry
+public class Line2 extends Map2Entry
 {
     public Point2 origin; // infinite line intersects this point
     public Vec2 direction; // unit length
@@ -16,6 +16,20 @@ public class Line2 implements Map2Entry
         origin = o;
         direction = dir;
         direction.normalize();
+    }
+
+    @Override
+    public String toString()
+    {
+        String ret = "<line\n";
+        if(mName != null)
+        {
+            ret += "  id=\"" + mName + "\"\n";
+        }
+        ret += "  org=" + origin.toString() + "\n";
+        ret += "  dir=" + direction.toString() + "\n";
+        ret += ">\n";
+        return ret;
     }
 
     /**
@@ -43,6 +57,12 @@ public class Line2 implements Map2Entry
         }
         else
             return 0;
+    }
+
+    @Override
+    public void translate(Vec2 dx)
+    {
+        origin.translate(dx);
     }
 
     @Override
@@ -87,6 +107,8 @@ public class Line2 implements Map2Entry
                 ret.hitPt = new Point2(r.origin.x + s0 * r.direction.x,
                                        r.origin.y + s0 * r.direction.y);
                 ret.hitT = diff.dotperp(r.direction) * invD0D1;
+                ret.hitPerp = this.direction.perp();
+                ret.hitEntry = this;
             }
         }
         else

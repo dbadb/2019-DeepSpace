@@ -6,10 +6,10 @@ import com.spartronics4915.frc2019.paths.TrajectoryGenerator;
 import com.spartronics4915.frc2019.subsystems.*;
 import com.spartronics4915.lib.util.*;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import java.io.IOException;
@@ -24,14 +24,16 @@ public class Robot extends TimedRobot
 {
     private Looper mEnabledLooper = new Looper();
     private Looper mDisabledLooper = new Looper();
-    private CheesyDriveHelper mCheesyDriveHelper = new CheesyDriveHelper();
-    private IControlBoard mControlBoard = ControlBoard.getInstance();
+    private IControlBoard mControlBoard = null;
     private TrajectoryGenerator mTrajectoryGenerator = TrajectoryGenerator.getInstance();
     private SubsystemManager mSubsystemManager = null;
     private Drive mDrive = null;
-    private Turret mTurret = null;
-    private Joystick mLearningJoystick = new Joystick(1); // TODO: Remove me when we're done learning
-    private LearningSubsystem mLearningSubsystem = null;
+    private PanelHandler mPanelHandler = null;
+    private CargoHandler mCargoHandler = null;
+    private CargoIntake mCargoIntake = null;
+    private Climber mClimber = null;
+    private LED mLED = null;
+    private Superstructure mSuperstructure = null;
     private AutoModeExecutor mAutoModeExecutor;
 
     // smartdashboard keys
@@ -90,21 +92,32 @@ public class Robot extends TimedRobot
             try
             {
                 mDrive = Drive.getInstance();
-                mLearningSubsystem = LearningSubsystem.getInstance();
-                // mTurret = Turret.getInstance(); // TODO
+                mPanelHandler = PanelHandler.getInstance();
+                mCargoHandler = CargoHandler.getInstance();
+                mCargoIntake = CargoIntake.getInstance();
+                mClimber = Climber.getInstance();
+                mLED = LED.getInstance();
+                mSuperstructure = Superstructure.getInstance();
+                mControlBoard = new ControlBoard();
+
                 mSubsystemManager = new SubsystemManager(
                         Arrays.asList(
                                 RobotStateEstimator.getInstance(),
                                 mDrive,
-                                mLearningSubsystem,
-                                // mTurret, TODO: Uncomment when turret is added
-                                Superstructure.getInstance()));
+                                mPanelHandler,
+                                mCargoHandler,
+                                mCargoIntake,
+                                mClimber,
+                                mLED,
+                                mSuperstructure));
                 mSubsystemManager.registerEnabledLoops(mEnabledLooper);
                 mSubsystemManager.registerDisabledLoops(mDisabledLooper);
                 SmartDashboard.putString(kRobotTestModeOptions, 
                                          "None,Drive,All");
                 SmartDashboard.putString(kRobotTestMode, "None");
                 SmartDashboard.putString(kRobotTestVariant, "");
+
+                mControlBoard = new ControlBoard();
             }
             catch (Exception e)
             {
@@ -280,6 +293,11 @@ public class Robot extends TimedRobot
     {
         try
         {
+            if (mControlBoard.getReturnToDriverControl() && mAutoModeExecutor.getAutoMode().isActive())
+                mAutoModeExecutor.stop(); // Careful! Teleop init doesn't get called until teleop actually starts
+            else if (!mAutoModeExecutor.getAutoMode().isActive())
+                teleopPeriodic();
+
             outputToSmartDashboard();
         }
         catch (Throwable t)
@@ -299,33 +317,39 @@ public class Robot extends TimedRobot
 
         try
         {
-            DriveSignal command = mCheesyDriveHelper.cheesyDrive(throttle, turn, mControlBoard.getQuickTurn(), false)/*.scale(12)*/;
-            mDrive.setOpenLoop(command);
-
-            if (mLearningJoystick.getRawButtonPressed(1))
+            if (mSuperstructure.isDriverControlled())
             {
-                mLearningSubsystem.setWantedState(LearningSubsystem.WantedState.INTAKE);
+                DriveSignal command = ArcadeDriveHelper.arcadeDrive(mControlBoard.getThrottle(), mControlBoard.getTurn(),
+                    true /* TODO: Decide squared inputs or not */).scale(mSuperstructure.isDrivingReversed() ? -1 : 1);
+
+                // mDrive.setOpenLoop(command);
+                mDrive.setVelocity(command, new DriveSignal(
+                    command.scale(Constants.kDriveLeftKv).getLeft() + Math.copySign(Constants.kDriveLeftVIntercept, command.getLeft()),
+                    command.scale(Constants.kDriveLeftKv).getRight() + Math.copySign(Constants.kDriveLeftVIntercept, command.getRight())
+                ));
+
+                if (mControlBoard.getReverseDirection())
+                {
+                    mSuperstructure.reverseDrivingDirection();
+                }
+                else if (mControlBoard.getDriveToSelectedTarget())
+                {
+                    mSuperstructure.setWantedState(Superstructure.WantedState.ALIGN_AND_INTAKE_CARGO);
+                }
+                // TODO (for button person): add buttons for all superstructure wanted states
             }
-            else if (mLearningJoystick.getRawButtonPressed(2))
+            else if (mControlBoard.getReturnToDriverControl())
             {
-                mLearningSubsystem.setWantedState(LearningSubsystem.WantedState.CLOSED);
+                mSuperstructure.setWantedState(Superstructure.WantedState.DRIVER_CONTROL);
             }
-            // mDrive.setVelocity(command, new DriveSignal(
-            //     command.scale(Constants.kDriveLeftKv).getLeft() + Math.copySign(Constants.kDriveLeftVIntercept, command.getLeft()),
-            //     command.scale(Constants.kDriveLeftKv).getRight() + Math.copySign(Constants.kDriveLeftVIntercept, command.getRight())
-            // ));
-
-            // if (mControlBoard.getSwitchTurretMode()) TODO: Uncomment when turret is finished
-            //     mTurret.setWantedState(mTurret.getWantedState() == Turret.WantedState.FOLLOW_LIDAR ? Turret.WantedState.FOLLOW_ODOMETRY
-            //             : Turret.WantedState.FOLLOW_LIDAR);
-
-            outputToSmartDashboard();
         }
         catch (Throwable t)
         {
             Logger.logThrowableCrash(t);
             throw t;
         }
+
+        outputToSmartDashboard();
     }
 
     @Override

@@ -1,48 +1,41 @@
 package com.spartronics4915.frc2019.subsystems;
 
-import edu.wpi.first.wpilibj.Joystick;
-
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.spartronics4915.lib.util.ILoop;
 import com.spartronics4915.lib.util.ILooper;
-import com.ctre.phoenix.motorcontrol.ControlMode;
 
-public class LearningSubsystem extends Subsystem
+public class CargoIntake extends Subsystem
 {
 
-    private static LearningSubsystem mInstance = null;
+    private static CargoIntake mInstance = null;
 
-    public static LearningSubsystem getInstance()
+    public static CargoIntake getInstance()
     {
         if (mInstance == null)
         {
-            mInstance = new LearningSubsystem();
+            mInstance = new CargoIntake();
         }
         return mInstance;
     }
 
     public enum WantedState
     {
-        CLOSED, INTAKE,
+        TODO
     }
 
     private enum SystemState
     {
-        CLOSING, INTAKING,
+        TODOING
     }
 
-    private WantedState mWantedState = WantedState.CLOSED;
-    private SystemState mSystemState = SystemState.CLOSING;
+    private WantedState mWantedState = WantedState.TODO;
+    private SystemState mSystemState = SystemState.TODOING;
 
-    private TalonSRX mIntakeMotor = null;
-
-    private LearningSubsystem()
+    private CargoIntake()
     {
         boolean success = true;
         try
         {
             // Instantiate your hardware here
-            mIntakeMotor = new TalonSRX(14);
         }
         catch (Exception e)
         {
@@ -59,26 +52,22 @@ public class LearningSubsystem extends Subsystem
         @Override
         public void onStart(double timestamp)
         {
-            synchronized (LearningSubsystem.this)
+            synchronized (CargoIntake.this)
             {
-                mWantedState = WantedState.CLOSED;
-                mSystemState = SystemState.CLOSING;
+                mWantedState = WantedState.TODO;
+                mSystemState = SystemState.TODOING;
             }
         }
 
         @Override
         public void onLoop(double timestamp)
         {
-            synchronized (LearningSubsystem.this)
+            synchronized (CargoIntake.this)
             {
                 SystemState newState = defaultStateTransfer();
                 switch (mSystemState)
                 {
-                    case INTAKING:
-                        mIntakeMotor.set(ControlMode.PercentOutput, 1.0);
-                        break;
-                    case CLOSING:
-                        stop();
+                    case TODOING:
                         break;
                     default:
                         logError("Unhandled system state!");
@@ -90,7 +79,7 @@ public class LearningSubsystem extends Subsystem
         @Override
         public void onStop(double timestamp)
         {
-            synchronized (LearningSubsystem.this)
+            synchronized (CargoIntake.this)
             {
                 stop();
             }
@@ -102,14 +91,11 @@ public class LearningSubsystem extends Subsystem
         SystemState newState = mSystemState;
         switch (mWantedState)
         {
-            case CLOSED:
-                newState = SystemState.CLOSING;
-                break;
-            case INTAKE:
-                newState = SystemState.INTAKING;
+            case TODO:
+                newState = SystemState.TODOING;
                 break;
             default:
-                newState = SystemState.CLOSING;
+                newState = SystemState.TODOING;
                 break;
         }
         return newState;
@@ -118,6 +104,11 @@ public class LearningSubsystem extends Subsystem
     public synchronized void setWantedState(WantedState wantedState)
     {
         mWantedState = wantedState;
+    }
+
+    public synchronized boolean atTarget()
+    {
+        return true;
     }
 
     @Override
@@ -135,28 +126,11 @@ public class LearningSubsystem extends Subsystem
     @Override
     public void outputTelemetry()
     {
-
     }
 
     @Override
     public void stop()
     {
         // Stop your hardware here
-        mIntakeMotor.set(ControlMode.PercentOutput, 0.0);
-    }
-
-    // This method would not normally be in a subsystem (it would be in Robot), but
-    // you need to edit it to get user input
-    public void teleopPeriodic(Joystick joystick)
-    {
-        if (joystick.getRawButtonPressed(1))
-        {
-            this.setWantedState(WantedState.INTAKE);
-        }
-        else if (joystick.getRawButtonPressed(2))
-        {
-            this.setWantedState(WantedState.CLOSED);
-            logNotice("foo");
-        }
     }
 }

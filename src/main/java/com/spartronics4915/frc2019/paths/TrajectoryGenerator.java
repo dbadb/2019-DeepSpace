@@ -4,7 +4,6 @@ import com.spartronics4915.frc2019.planners.DriveMotionPlanner;
 import com.spartronics4915.lib.geometry.Pose2d;
 import com.spartronics4915.lib.geometry.Pose2dWithCurvature;
 import com.spartronics4915.lib.geometry.Rotation2d;
-import com.spartronics4915.lib.geometry.Translation2d;
 import com.spartronics4915.lib.trajectory.Trajectory;
 import com.spartronics4915.lib.trajectory.TrajectoryUtil;
 import com.spartronics4915.lib.trajectory.timing.CentripetalAccelerationConstraint;
@@ -19,10 +18,10 @@ import java.util.List;
 public class TrajectoryGenerator
 {
 
-    private static final double kMaxVelocity = 24.0; // inches/s
-    private static final double kMaxAccel = 24.0; // inches/s
-    private static final double kMaxCentripetalAccel = 100.0; // inches/s
-    private static final double kMaxVoltage = 9.0; // volts
+    private static final double kMaxVelocity = 240.0; // inches/s
+    private static final double kMaxAccel = 90.0; // inches/s
+    private static final double kMaxCentripetalAccel = 50.0; // inches/s
+    private static final double kMaxVoltage = 10.0; // volts
 
     private static TrajectoryGenerator mInstance = new TrajectoryGenerator();
     private final DriveMotionPlanner mMotionPlanner;

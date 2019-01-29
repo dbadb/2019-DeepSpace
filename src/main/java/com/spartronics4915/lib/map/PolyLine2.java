@@ -2,28 +2,35 @@ package com.spartronics4915.lib.map;
 
 import java.util.ArrayList;
 
-public class PolyLine2 implements Map2Entry
+public class PolyLine2 extends Map2Entry
 {
-    public enum Occupancy
+    public enum Orientation
     {
         kUndefined,
-        kAsSolid, // presumes closed 
-        kAsHole   // ditto
+        kStandard,
+        kReversed
     }
 
     private ArrayList<LineSeg2> mSegments;
-    private Occupancy mOccupancy;
+    private Orientation mOrientation;
 
     static PolyLine2 createRect2(Point2 cornerOne, Point2 cornerTwo)
     {
         // These may not be top or right if cornerTwo is left or higher than
         // cornerOne but it's easier to reason about this by naming things this way.
+        // We want unique copies of all points to ensure independent editing.
         Point2 topRight = new Point2(cornerTwo.x, cornerOne.y);
         Point2 bottomLeft = new Point2(cornerOne.x, cornerTwo.y);
-        return new PolyLine2(new LineSeg2(cornerOne, topRight),
-                            new LineSeg2(topRight, cornerTwo),
-                            new LineSeg2(cornerTwo, bottomLeft),
-                            new LineSeg2(bottomLeft, topRight));
+        PolyLine2 ret = new PolyLine2(
+                            new LineSeg2(cornerOne, topRight),
+                            new LineSeg2(new Point2(topRight), cornerTwo),
+                            new LineSeg2(new Point2(cornerTwo), bottomLeft),
+                            new LineSeg2(new Point2(bottomLeft), 
+                                         new Point2(cornerOne))
+                            );
+        // this winding area produces normals to the Inside
+        ret.mOrientation = Orientation.kStandard;
+        return ret; 
     }
 
     static PolyLine2 createRect(float x0, float y0, float x1, float y1)
@@ -31,57 +38,111 @@ public class PolyLine2 implements Map2Entry
         return createRect2(new Point2(x0, y0), new Point2(x1, y1));
     }
 
+    static PolyLine2 createRectC(Point2 center, float xsize, float ysize)
+    {
+        return createRect(center.x - xsize/2f, center.y - ysize/2f,
+                           center.x + xsize/2f, center.x + ysize/2f);
+    }
+
     public PolyLine2(ArrayList<LineSeg2> al)
     {
         mSegments = al;
-        mOccupancy = Occupancy.kUndefined;
+        mOrientation = Orientation.kUndefined;
     }
 
     public PolyLine2(LineSeg2... al)
     {
         mSegments = new ArrayList<LineSeg2>();
-        mOccupancy = Occupancy.kUndefined;
+        mOrientation = Orientation.kUndefined;
         for(int i=0; i<al.length; i++)
         {
             mSegments.add(al[i]);
         }
     }
 
-    public void setOccupancy(Occupancy o)
+    public void append(LineSeg2 ls)
     {
-        mOccupancy = o;
+        mSegments.add(ls);
     }
 
-    public Occupancy getOccupancy()
+    public void reverseOrientation()
     {
-        return mOccupancy;
+        switch(mOrientation)
+        {
+        case kStandard:
+            mOrientation = Orientation.kReversed;
+            break;
+        case kReversed:
+            mOrientation = Orientation.kStandard;
+            break;
+        default:
+            break;
+        }
+    }
+
+    public void setOrientation(Orientation o)
+    {
+        mOrientation = o;
+    }
+
+    public Orientation getOrientation()
+    {
+        return mOrientation;
+    }
+
+    @Override
+    public String toString()
+    {
+        String ret = "<polyline\n";
+        if(mName != null)
+            ret += "  id=\"" + mName + "\"\n";
+        
+        for (Map2Entry e : mSegments) 
+            ret += e.toString();
+        ret += ">\n";
+        return ret;
+    }
+
+    @Override
+    public void translate(Vec2 dx)
+    {
+        for (LineSeg2 ls : mSegments) 
+        {
+            ls.translate(dx);
+        }
     }
 
     @Override
     public boolean contains(Point2 p)
     {
-        if(mOccupancy == Occupancy.kUndefined)
-            return false;
-
-        // Find nearestPt, then dot-product vector with line.
-        //  * if we are known to be convex, then first nearest point 
-        //      would suffice
         boolean ret = false;
-        double minDist = Double.MAX_VALUE;
-        LineSeg2 minLine = null;
-        for (LineSeg2 ls : mSegments) 
+        if(mOrientation != Orientation.kUndefined)
         {
-            Point2 pp = ls.nearest(p);
-            double distSq = pp.getDistanceSq(p);
-            if (distSq < minDist) 
+            // Trace in arbitrary direction. Dot hitPerp with ray.
+            // Here we're using winding order to determine inside-outside.
+            // 
+            Ray2 ray = new Ray2(p, new Vec2(1, 0));
+            Hit2 hit = this.trace(ray);
+            if(hit != null)
             {
-                minDist = distSq;
-                minLine = ls;
+                // N is on the right of the vector.
+                // If the pline is clockwise, a point is inside
+                // If orientation is reversed
+                // if ray.N < 0.
+                //           |
+                //           |
+                //     <--N--|
+                //           | 
+                // -ray----->|   line dir(0, 1), perp(1, -0);
+                //           |
+                //           v
+                //
+                float dot = ray.direction.dot(hit.hitPerp);
+                if(dot <= 0) // hit from inside
+                    ret = true;
+                if(mOrientation == Orientation.kReversed)
+                    ret = !ret;
             }
-        }
-        if(minLine != null)
-        {
-
         }
         return ret;
     }
@@ -90,10 +151,22 @@ public class PolyLine2 implements Map2Entry
     public Hit2 trace(Ray2 r)
     {
         Hit2 ret = null;
+        float minDist = Float.MAX_VALUE;
         for(LineSeg2 ls : mSegments)
         {
-
+            Hit2 lh = ls.trace(r);
+            if(lh != null)
+            {
+                float ld = lh.distanceSq();
+                if(ld < minDist)
+                {
+                    minDist = ld;
+                    ret = lh;
+                }
+            }
         }
+        if(ret != null)
+            ret.hitEntry = this;
         return ret;
     }
 

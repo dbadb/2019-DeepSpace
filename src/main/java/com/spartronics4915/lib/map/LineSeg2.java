@@ -1,6 +1,6 @@
 package com.spartronics4915.lib.map;
 
-public class LineSeg2 implements Map2Entry
+public class LineSeg2 extends Map2Entry
 {
     public Point2 p0, p1;
 
@@ -17,6 +17,27 @@ public class LineSeg2 implements Map2Entry
     }
 
     @Override
+    public String toString()
+    {
+        String ret = "<lineseg\n";
+        if(mName != null)
+            ret += "  id=\"" + mName + "\"\n";
+        ret += "  p0=" + this.p0.toString() + "\n";
+        ret += "  p1=" + this.p1.toString() + "\n";
+        ret += ">\n";
+        return ret;
+    }
+
+    @Override
+    public void translate(Vec2 dx)
+    {
+        this.p0.x += dx.x;
+        this.p0.y += dx.y;
+        this.p1.x += dx.x;
+        this.p1.y += dx.y;
+    }
+
+    @Override
     public Hit2 trace(Ray2 ray)
     {
         Line2 l2 = new Line2();
@@ -26,6 +47,8 @@ public class LineSeg2 implements Map2Entry
         {
             if(Math.abs(ret.hitT) > extent)
                 ret = null;
+            else
+                ret.hitEntry = this;
         }
         return ret;
     }
@@ -78,11 +101,6 @@ public class LineSeg2 implements Map2Entry
     {
         return new Point2(.5f * (this.p0.x + this.p1.x),
                           .5f * (this.p0.y + this.p1.y));
-    }
-
-    public String toString()
-    {
-        return "LineSeg2(" + this.p0 + "," + this.p1 + ")";
     }
 
     /**

@@ -2,7 +2,6 @@ package com.spartronics4915.lib.geometry;
 
 import com.spartronics4915.lib.util.Util;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SE2MathTest

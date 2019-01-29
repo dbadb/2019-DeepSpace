@@ -66,6 +66,23 @@ public class Vec2
     
     /**
      * @return Vec2 that's perpendicular to this.
+     *   When viewed from origin toward direction, 
+     *   the perp is on the right side
+     * 
+     *      vec(1, 0)  -> vec(0, -1)
+     *          ---->  ->    |
+     *                       v
+     *      vec(-1, 0) -> vec(0, 1)
+     *          <----  ->    ^
+     *                       |
+     *      vec(0, 1)  -> vec(1, 0)
+     *          ^  
+     *          |      ->  --->
+     * 
+     *      vec(0, -1) -> vec(-1, 0)
+     *          |  
+     *          v      ->  <---
+     *          
      */
     public Vec2 perp()
     {

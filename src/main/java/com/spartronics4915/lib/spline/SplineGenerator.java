@@ -85,7 +85,9 @@ public class SplineGenerator
         Pose2d transformation = new Pose2d(new Translation2d(p0, p1).rotateBy(r0.inverse()), r1.rotateBy(r0.inverse()));
         Twist2d twist = Pose2d.log(transformation);
 
-        if (twist.dy > maxDy || twist.dx > maxDx || twist.dtheta > maxDTheta)
+        if (Math.abs(twist.dy) > maxDy || 
+            Math.abs(twist.dx) > maxDx || 
+            Math.abs(twist.dtheta) > maxDTheta)
         {
             if (sRecursionDepth++ > kRecursionDepthLimit)
             {

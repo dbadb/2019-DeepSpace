@@ -264,6 +264,20 @@ public class SE2MathTest
         assertEquals(3.0 + 10.0 * Math.cos(expected_angle_rads), pose3.getTranslation().x(), kTestEpsilon);
         assertEquals(-6.0 + 10.0 * Math.sin(expected_angle_rads), pose3.getTranslation().y(), kTestEpsilon);
         assertEquals(expected_angle_rads, pose3.getRotation().getRadians(), kTestEpsilon);
+
+        // typical calc from SplineGenerator - prove that large negative values
+        // arise from simple poses.
+        Pose2d pose0 = new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(180));
+        pose1 = new Pose2d(new Translation2d(78, 78), Rotation2d.fromDegrees(90)); 
+        Translation2d p0 = pose0.mTranslation;
+        Translation2d p1 = pose1.mTranslation;
+        Rotation2d r0 = pose0.mRotation;
+        Rotation2d r1 = pose1.mRotation;
+        Pose2d xp = new Pose2d(new Translation2d(p0, p1).rotateBy(r0.inverse()), 
+                                r1.rotateBy(r0.inverse()));
+        Twist2d twist = Pose2d.log(xp);
+        assert(twist.dy < -122);
+
         // System.out.println("testPose end------------------}");
     }
 

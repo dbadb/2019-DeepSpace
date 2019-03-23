@@ -35,6 +35,13 @@ public class SplineGeneratorTest
         assertEquals(cur_pose.getTranslation().x(), 15.0, kTestEpsilon);
         assertEquals(cur_pose.getTranslation().y(), 10.0, kTestEpsilon);
         assertEquals(cur_pose.getRotation().getDegrees(), -78.69006752597981, kTestEpsilon);
-        assertEquals(arclength, 23.17291953186379, kTestEpsilon);
+        // String str = "" + arclength;
+        assertEquals(arclength, 23.225668846144476, kTestEpsilon);
+
+        p1 = new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(180));
+        p2 = new Pose2d(new Translation2d(78, 78), Rotation2d.fromDegrees(90));
+        s = new QuinticHermiteSpline(p1, p2);
+        samples = SplineGenerator.parameterizeSpline(s);
+        assert(samples.size() > 2);
     }
 }

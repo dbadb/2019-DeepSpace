@@ -5,7 +5,9 @@ import com.spartronics4915.frc2019.loops.Looper;
 import com.spartronics4915.frc2019.paths.TrajectoryGenerator;
 import com.spartronics4915.frc2019.subsystems.*;
 import com.spartronics4915.frc2019.subsystems.CargoChute.WantedState;
+import com.spartronics4915.lib.geometry.Pose2d;
 import com.spartronics4915.lib.geometry.Rotation2d;
+import com.spartronics4915.lib.geometry.Twist2d;
 import com.spartronics4915.lib.physics.DifferentialDrive;
 import com.spartronics4915.lib.physics.DifferentialDrive.ChassisState;
 import com.spartronics4915.lib.physics.DifferentialDrive.DriveDynamics;
@@ -387,7 +389,7 @@ public class Robot extends TimedRobot
 
                 // CLIMBING
                 if (mControlBoard.getClimb())
-                    mSuperstructure.setWantedState(Superstructure.WantedState.CLIMB);
+                    mSuperstructure.setWantedState(Superstructure.WantedState.LOWER_CHUTE_AND_CLIMB);
 
                 codeTimes[nctr++] = mCodeTimer.get(); // 2 after climbing
 
@@ -427,6 +429,7 @@ public class Robot extends TimedRobot
                 }
                 else if (mControlBoard.getManualShootCargoBay())
                     mSuperstructure.setWantedState(Superstructure.WantedState.SHOOT_CARGO_BAY);
+                    // mCargoChute.setWantedState(CargoChute.WantedState.SHOOT_BAY);
                 else if (mControlBoard.getManualShootCargoRocket())
                     mCargoChute.setWantedState(CargoChute.WantedState.SHOOT_ROCKET);
                 else if (mControlBoard.getManualChuteUp())

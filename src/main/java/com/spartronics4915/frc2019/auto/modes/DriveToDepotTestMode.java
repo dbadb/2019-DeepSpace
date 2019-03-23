@@ -1,22 +1,19 @@
 package com.spartronics4915.frc2019.auto.modes;
 
-import com.spartronics4915.frc2019.auto.AutoConstants;
+import com.spartronics4915.frc2019.Constants;
 import com.spartronics4915.frc2019.auto.AutoModeBase;
 import com.spartronics4915.frc2019.auto.AutoModeEndedException;
-import com.spartronics4915.frc2019.auto.actions.DriveOffHAB;
 import com.spartronics4915.frc2019.auto.actions.DriveTrajectory;
-import com.spartronics4915.frc2019.auto.actions.ZeroOdometryOnHAB;
-import com.spartronics4915.frc2019.auto.actions.DriveOffHAB.HABLevel;
-import com.spartronics4915.frc2019.auto.actions.ZeroOdometryOnHAB.StartPosition;
 import com.spartronics4915.frc2019.paths.TrajectoryGenerator;
 import com.spartronics4915.frc2019.paths.TrajectoryGenerator.TrajectorySet;
+import com.spartronics4915.frc2019.subsystems.RobotStateEstimator;
 
-public class PlaceHatchFromMiddleMode extends AutoModeBase
+public class DriveToDepotTestMode extends AutoModeBase
 {
-
+    
     private final boolean mIsLeft;
 
-    public PlaceHatchFromMiddleMode(boolean isLeft)
+    public DriveToDepotTestMode(boolean isLeft)
     {
         mIsLeft = isLeft;
     }
@@ -25,7 +22,10 @@ public class PlaceHatchFromMiddleMode extends AutoModeBase
     protected void routine() throws AutoModeEndedException
     {
         TrajectorySet tSet = TrajectoryGenerator.getInstance().getTrajectorySet();
-        runAction(new DriveTrajectory(tSet.driveToParallelCargoBayFromMiddle.get(mIsLeft), true));
+        
+        runAction(new DriveTrajectory(tSet.driveToDepotFromClosestCargoBay.get(mIsLeft), true));
+        runAction(new DriveTrajectory(tSet.driveToMiddleCargoBayFromDepot.get(mIsLeft)));
+
     }
 
 }

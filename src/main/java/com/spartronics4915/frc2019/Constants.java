@@ -20,7 +20,7 @@ import java.nio.file.FileSystems;
  */
 public class Constants
 {
-
+    public static final String kRobotId;
     public static final double kLooperDt = 0.01;
 
     /**** Careful! Measurement units are in millimeters ****/
@@ -249,6 +249,7 @@ public class Constants
         {
             // file only exists to override defaults
             config = new String(Files.readAllBytes(machineIdFile));
+            config = config.replaceAll("(\\r|\\n)", "");
         }
         catch (Exception e)
         {
@@ -256,10 +257,11 @@ public class Constants
         }
         Logger.notice("running on " + config + " constants");
 
+        kRobotId = config;
+
         switch (config)
         {
             case "TestChassis":
-            case "TestChassis\n":
                 kIsTestChassis = true;
                 kDriveWheelTrackWidthInches = 23.75;
                 kDriveWheelDiameterInches = 6;
@@ -285,7 +287,6 @@ public class Constants
                 break;
 
             case "SecondRobot":
-            case "SecondRobot\n":
                 kIsTestChassis = false;
                 kDriveWheelTrackWidthInches = 25.75;
                 kDriveWheelDiameterInches = 6;
@@ -312,6 +313,7 @@ public class Constants
                 kDriveVelocityKp = 0.3;
                 break;
 
+            case "FirstRobot":
             default:
                 kIsTestChassis = false;
                 kDriveWheelTrackWidthInches = 25.75;

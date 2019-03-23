@@ -71,6 +71,7 @@ public class Robot extends TimedRobot
         try
         {
             SmartDashboard.putString("Robot/GamePhase", "ROBOT INIT");
+            SmartDashboard.putString("Robot/Id", Constants.kRobotId);
             Logger.logRobotInit();
 
             try (InputStream manifest =
